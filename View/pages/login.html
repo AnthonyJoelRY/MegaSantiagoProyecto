@@ -5,31 +5,15 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>MegaSantiago | Acceder / Registrarse</title>
 
-    <link rel="stylesheet" href="../Model/csss estilos/estilos.css">
+    <!-- CSS (desde View/pages → Model) -->
+    <link rel="stylesheet" href="../../Model/csss estilos/estilos.css">
 </head>
 <body>
 
-    <!-- BARRA SUPERIOR -->
-    <div class="top-bar">
-        <p>ENCUENTRA DE TODO EN MEGASANTIAGO - OFERTAS DEL MES</p>
-    </div>
-
-    <!-- HEADER -->
-    <header class="main-header">
-        <div class="header-left">
-            <a href="../index.html">
-                <img src="../Model/imagenes/Logo_MegaSantiago.png" alt="MegaSantiago" class="logo-mega">
-            </a>
-        </div>
-
-        <div class="header-center">
-            <h1 class="auth-header-title">Acceder / Registrarse</h1>
-        </div>
-
-        <div class="header-right">
-            <a href="../index.html" class="link-header">← Volver al inicio</a>
-        </div>
-    </header>
+    <!-- ===== LAYOUT ===== -->
+    <div id="header"></div>
+    <!-- NO NAV en login -->
+    <!-- ================== -->
 
     <!-- CONTENIDO -->
     <main class="auth-page">
@@ -53,7 +37,9 @@
                         <button type="button" class="btn-eye" data-target="login-clave">👁</button>
                     </div>
 
-                    <button type="submit" class="btn-auth-primary">INICIAR SESIÓN</button>
+                    <button type="submit" class="btn-auth-primary">
+                        INICIAR SESIÓN
+                    </button>
                 </form>
             </div>
 
@@ -75,19 +61,22 @@
                         <button type="button" class="btn-eye" data-target="reg-clave">👁</button>
                     </div>
 
-                    <button type="submit" class="btn-auth-primary">CREAR CUENTA</button>
+                    <button type="submit" class="btn-auth-primary">
+                        CREAR CUENTA
+                    </button>
                 </form>
             </div>
 
         </section>
     </main>
 
-    <footer class="footer">
-        <p>MegaSantiago © 2025 - Todos los derechos reservados</p>
-    </footer>
+    <!-- ===== FOOTER ===== -->
+    <div id="footer"></div>
+    <div id="scripts"></div>
+    <!-- ================== -->
 
     <script>
-        // Mostrar / ocultar contraseña
+        /* ================== VISIBILIDAD DE CONTRASEÑA ================== */
         document.querySelectorAll(".btn-eye").forEach(btn => {
             btn.addEventListener("click", () => {
                 const targetId = btn.getAttribute("data-target");
@@ -96,12 +85,10 @@
             });
         });
 
-        // 🔗 Ruta al controlador PHP
+        // 🔗 Ruta al controlador PHP (NO TOCAR)
         const API = "/MegaSantiagoFront/Controller/usuariosController.php";
 
-        // ==============================
-        //   LOGIN
-        // ==============================
+        /* ================== LOGIN ================== */
         document.getElementById("formLogin").addEventListener("submit", async (e) => {
             e.preventDefault();
 
@@ -133,20 +120,18 @@
                     return;
                 }
 
-                // Guardar usuario en localStorage
+                // Guardar usuario
                 localStorage.setItem("usuarioMega", JSON.stringify(data.usuario));
 
                 alert("Inicio de sesión exitoso.");
-                window.location.href = "../index.html";
+                window.location.href = "../../index.html";
             } catch (err) {
                 console.error(err);
                 alert("Error de conexión con el servidor.");
             }
         });
 
-        // ==============================
-        //   REGISTRO
-        // ==============================
+        /* ================== REGISTRO ================== */
         document.getElementById("formRegistro").addEventListener("submit", async (e) => {
             e.preventDefault();
 
@@ -179,7 +164,6 @@
                 }
 
                 alert("Cuenta creada exitosamente, ahora puedes iniciar sesión.");
-                // opcional: rellenar el login con el correo recién registrado
                 document.getElementById("login-email").value = email;
                 document.getElementById("login-clave").value = "";
             } catch (err) {
@@ -187,6 +171,25 @@
                 alert("Error de conexión con el servidor.");
             }
         });
+
+        /* ================== ALIAS BUSCADOR (OPCIÓN 1) ==================
+           Si alguien usa el buscador desde el header estando aquí,
+           redirige a la página de búsqueda
+        =============================================================== */
+        function realizarBusquedaGlobal() {
+            const input = document.getElementById("buscador");
+            if (!input) return;
+            const q = input.value.trim();
+            if (!q) return;
+            window.location.href = "busqueda.html?q=" + encodeURIComponent(q);
+        }
+    </script>
+
+    <!-- ===== LAYOUT LOADER ===== -->
+    <script src="../js/layout-loader.js"></script>
+    <script>
+        // Cargamos SOLO header + footer (no nav)
+        loadLayout();
     </script>
 
 </body>

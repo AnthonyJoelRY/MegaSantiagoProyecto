@@ -1,48 +1,41 @@
 // Model/js/sesion-usuario.js
+// Este script puede ser insertado dinámicamente (por fetch/layout-loader),
+// así que NO debemos depender únicamente de DOMContentLoaded.
 
-document.addEventListener("DOMContentLoaded", () => {
-    const cont = document.getElementById("header-usuario");
-    if (!cont) return;
+function initSesionUsuario() {
+  const contenedor = document.getElementById("header-usuario");
+  if (!contenedor) return;
 
-    // ¿Estoy en /View/ o en la raíz (index)?
-    const enView = window.location.pathname.includes("/View/");
-    const loginHref   = enView ? "login.html"   : "View/login.html";
-    const carritoHref = enView ? "carrito.html" : "View/carrito.html";
+  const usuario = JSON.parse(localStorage.getItem("usuarioMega"));
 
-    let usuario = null;
-    try {
-        usuario = JSON.parse(localStorage.getItem("usuarioMega") || "null");
-    } catch (e) {
-        usuario = null;
-    }
-
-    // Si NO hay sesión → mostrar Acceder / Registrarse + Carrito
-    if (!usuario) {
-        cont.innerHTML = `
-            <a href="${loginHref}" class="link-header">Acceder / Registrarse</a>
-            <a href="${carritoHref}" class="link-header">🛒 Carrito</a>
-        `;
-        return;
-    }
-
-    // Si hay usuario → mostrar saludo + carrito + cerrar sesión
-    const email = usuario.email || "Usuario";
-
-    cont.innerHTML = `
-        <span class="link-header user-welcome">Hola, ${email}</span>
-        <a href="${carritoHref}" class="link-header">🛒 Carrito</a>
-        <button type="button" id="btnLogout" class="link-header btn-link">
-            Cerrar sesión
-        </button>
+  // ❌ NO hay sesión
+  if (!usuario) {
+    contenedor.innerHTML = `
+      <a href="/MegaSantiagoFront/View/pages/login.html" class="link-header">
+        Acceder / Registrarse
+      </a>
+      <a href="/MegaSantiagoFront/View/pages/carrito.html" class="link-header">
+        🛒 Carrito
+      </a>
     `;
+    return;
+  }
 
-    const btnLogout = document.getElementById("btnLogout");
-    if (btnLogout) {
-        btnLogout.addEventListener("click", () => {
-            localStorage.removeItem("usuarioMega");
-            // opcional limpiar también el carrito si quieres
-            // localStorage.removeItem("carritoMega");
-            window.location.reload();
-        });
-    }
-});
+  // ✅ HAY sesión
+  contenedor.innerHTML = `
+    <span class="user-name">Hola, ${usuario.email}</span>
+    <a href="/MegaSantiagoFront/View/pages/carrito.html" class="link-header">🛒</a>
+    <a href="#" id="logout" class="link-header">Salir</a>
+  `;
+
+  document.getElementById("logout").addEventListener("click", () => {
+    localStorage.removeItem("usuarioMega");
+    window.location.href = "/MegaSantiagoFront/index.html";
+  });
+}
+
+if (document.readyState === "loading") {
+  document.addEventListener("DOMContentLoaded", initSesionUsuario);
+} else {
+  initSesionUsuario();
+}

@@ -5,33 +5,14 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>MegaSantiago | Carrito</title>
 
-    <!-- CSS: desde View → Model -->
-    <link rel="stylesheet" href="../Model/csss estilos/estilos.css">
+    <!-- CSS (desde View/pages → Model) -->
+    <link rel="stylesheet" href="../../Model/csss estilos/estilos.css">
 </head>
 <body>
 
-    <!-- BARRA SUPERIOR -->
-    <div class="top-bar">
-        <p>ENCUENTRA DE TODO EN MEGASANTIAGO - OFERTAS DEL MES</p>
-    </div>
-
-    <!-- HEADER -->
-    <header class="main-header">
-        <div class="header-left">
-            <a href="../index.html">
-                <!-- Logo: View → Model/imagenes -->
-                <img src="../Model/imagenes/Logo_MegaSantiago.png" alt="MegaSantiago" class="logo-mega">
-            </a>
-        </div>
-
-        <div class="header-center">
-            <h1 class="auth-header-title">Carrito de compras</h1>
-        </div>
-
-        <div class="header-right">
-            <a href="../index.html" class="link-header">← Seguir comprando</a>
-        </div>
-    </header>
+    <!-- ===== LAYOUT ===== -->
+    <div id="header"></div>
+    <!-- ================== -->
 
     <!-- CONTENIDO CARRITO -->
     <main class="cart-page">
@@ -64,7 +45,7 @@
 
                     <div class="cart-total">
                         <span>Total:</span>
-                        <strong id="totalCarrito">$0,00</strong>
+                        <strong id="totalCarrito">$0.00</strong>
                     </div>
                 </div>
 
@@ -76,9 +57,10 @@
         </section>
     </main>
 
-    <footer class="footer">
-        <p>MegaSantiago © 2025 - Todos los derechos reservados</p>
-    </footer>
+    <!-- ===== FOOTER ===== -->
+    <div id="footer"></div>
+    <div id="scripts"></div>
+    <!-- ================== -->
 
     <script>
         // ----- LÓGICA DEL CARRITO EN LA PÁGINA CARRITO -----
@@ -91,7 +73,7 @@
         }
 
         function formatearDinero(valor) {
-            return '$' + valor.toFixed(2);
+            return '$' + Number(valor).toFixed(2);
         }
 
         function renderCarrito() {
@@ -100,14 +82,13 @@
             const divContenido = document.getElementById('cart-contenido');
             const spanTotal = document.getElementById('totalCarrito');
 
-            let carrito = obtenerCarrito();
-
+            const carrito = obtenerCarrito();
             tbody.innerHTML = '';
 
             if (carrito.length === 0) {
                 divVacio.style.display = 'block';
                 divContenido.style.display = 'none';
-                spanTotal.textContent = '$0,00';
+                spanTotal.textContent = '$0.00';
                 return;
             }
 
@@ -147,7 +128,7 @@
                 if (isNaN(nuevaCantidad) || nuevaCantidad < 1) nuevaCantidad = 1;
                 e.target.value = nuevaCantidad;
 
-                let carrito = obtenerCarrito();
+                const carrito = obtenerCarrito();
                 const item = carrito.find(p => p.id === id);
                 if (item) {
                     item.cantidad = nuevaCantidad;
@@ -168,16 +149,37 @@
             }
         });
 
-        // Vaciar carrito
-        document.getElementById('btnVaciar').addEventListener('click', function() {
-            if (confirm('¿Seguro que quieres vaciar el carrito?')) {
-                localStorage.removeItem('carritoMega');
-                renderCarrito();
+        // Vaciar carrito (ahora espera al DOM + plantilla)
+        function initCarritoPage() {
+            const btnVaciar = document.getElementById('btnVaciar');
+            if (btnVaciar) {
+                btnVaciar.addEventListener('click', function() {
+                    if (confirm('¿Seguro que quieres vaciar el carrito?')) {
+                        localStorage.removeItem('carritoMega');
+                        renderCarrito();
+                    }
+                });
             }
-        });
+            renderCarrito();
+        }
 
-        // Inicializar
-        renderCarrito();
+        /* ===== ALIAS BUSCADOR (OPCIÓN 1) ===== */
+        function realizarBusquedaGlobal() {
+            const input = document.getElementById("buscador");
+            if (!input) return;
+            const q = input.value.trim();
+            if (!q) return;
+            window.location.href = "busqueda.html?q=" + encodeURIComponent(q);
+        }
+    </script>
+
+    <!-- ===== LAYOUT LOADER ===== -->
+    <script src="../js/layout-loader.js"></script>
+    <script>
+        // Cargar plantilla y luego iniciar carrito (por si el layout mete scripts o header)
+        loadLayout().then(() => {
+            initCarritoPage();
+        });
     </script>
 
 </body>

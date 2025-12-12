@@ -5,112 +5,15 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>MegaSantiago | Productos de Arte</title>
 
-    <!-- CSS desde View → Model -->
-    <link rel="stylesheet" href="../Model/csss estilos/estilos.css">
+    <!-- CSS (desde View/pages → Model) -->
+    <link rel="stylesheet" href="../../Model/csss estilos/estilos.css">
 </head>
 <body>
 
-    <div class="top-bar">
-        <p>ENCUENTRA DE TODO EN MEGASANTIAGO - OFERTAS DEL MES</p>
-    </div>
-
-    <!-- HEADER -->
-    <header class="main-header">
-        <div class="header-left">
-            <a href="../index.html">
-                <img src="../Model/imagenes/Logo_MegaSantiago.png" alt="MegaSantiago" class="logo-mega">
-            </a>
-        </div>
-
-        <div class="header-center">
-            <div class="search-box">
-                <input id="buscador" type="text" placeholder="Busca tu producto">
-                <button class="btn-search" type="button" onclick="realizarBusquedaGlobal()">
-                    <svg width="18" height="18" fill="white" viewBox="0 0 24 24">
-                        <path d="M21 20l-5.8-5.8a7 7 0 10-1.4 1.4L20 21zM5 11a6 6 0 1112 0A6 6 0 015 11z"/>
-                    </svg>
-                </button>
-            </div>
-        </div>
-
-        <!-- Se rellena dinámicamente según la sesión -->
-        <div class="header-right" id="header-usuario"></div>
-    </header>
-
-    <!-- NAV -->
-    <nav class="nav-principal">
-        <ul class="menu">
-            <li class="menu-item has-mega">
-                <a href="bazar.html">BAZAR ▾</a>
-                <div class="mega-menu columnas-3">
-                    <div class="col-mega">
-                        <h4>ACCESORIOS</h4>
-                        <a href="bazar.html">Globos</a>
-                        <a href="bazar.html">Decoración fiestas</a>
-                    </div>
-                    <div class="col-mega">
-                        <h4>HOGAR & FAMILIA</h4>
-                        <a href="bazar.html">Organizadores</a>
-                        <a href="bazar.html">Velas</a>
-                    </div>
-                    <div class="col-mega">
-                        <h4>VARIOS</h4>
-                        <a href="bazar.html">Regalos</a>
-                        <a href="bazar.html">Detalles</a>
-                    </div>
-                </div>
-            </li>
-
-            <li class="menu-item has-sub">
-                <a href="papeleria.html">PAPELERÍA ▾</a>
-                <ul class="submenu">
-                    <li><a href="papeleria.html">Cartulinas</a></li>
-                    <li><a href="papeleria.html">Papeles</a></li>
-                    <li><a href="papeleria.html">Sobres</a></li>
-                </ul>
-            </li>
-
-            <li class="menu-item has-sub active">
-                <a href="productos-arte.html">PRODUCTOS DE ARTE ▾</a>
-                <ul class="submenu">
-                    <li><a href="productos-arte.html">Pinturas</a></li>
-                    <li><a href="productos-arte.html">Pinceles</a></li>
-                    <li><a href="productos-arte.html">Lienzos</a></li>
-                </ul>
-            </li>
-
-            <li class="menu-item has-mega">
-                <a href="suministros-oficina.html">SUMINISTROS DE OFICINA ▾</a>
-                <div class="mega-menu columnas-2">
-                    <div class="col-mega">
-                        <h4>ACCESORIOS</h4>
-                        <a href="suministros-oficina.html">Archivadores</a>
-                        <a href="suministros-oficina.html">Clips y grapas</a>
-                        <a href="suministros-oficina.html">Bandejas</a>
-                    </div>
-                    <div class="col-mega">
-                        <h4>TECNOLOGÍA</h4>
-                        <a href="suministros-oficina.html">Calculadoras</a>
-                        <a href="suministros-oficina.html">Accesorios PC</a>
-                    </div>
-                </div>
-            </li>
-
-            <li class="menu-item has-sub">
-                <a href="utiles-escolares.html">ÚTILES ESCOLARES ▾</a>
-                <ul class="submenu">
-                    <li><a href="utiles-escolares.html">Mochilas</a></li>
-                    <li><a href="utiles-escolares.html">Cuadernos</a></li>
-                    <li><a href="utiles-escolares.html">Estuches</a></li>
-                    <li><a href="utiles-escolares.html">Colores y marcadores</a></li>
-                </ul>
-            </li>
-
-            <li class="menu-item">
-              <a href="../index.html#promociones">PROMOCIONES</a>
-            </li>
-        </ul>
-    </nav>
+    <!-- ===== LAYOUT ===== -->
+    <div id="header"></div>
+    <div id="nav"></div>
+    <!-- ================== -->
 
     <!-- HERO -->
     <section class="category-hero">
@@ -177,9 +80,10 @@
         </div>
     </main>
 
-    <footer class="footer">
-        <p>MegaSantiago © 2025 - Todos los derechos reservados</p>
-    </footer>
+    <!-- ===== FOOTER ===== -->
+    <div id="footer"></div>
+    <div id="scripts"></div>
+    <!-- ================== -->
 
     <!-- ============================= -->
     <!--   JS PRODUCTOS DE ARTE       -->
@@ -193,8 +97,8 @@
 
         function detectarTipoDesdeNombre(nombre) {
             const n = (nombre || "").toLowerCase();
-            if (n.includes("acril"))   return "acrilica";
-            if (n.includes("espuma"))  return "espuma";
+            if (n.includes("acril")) return "acrilica";
+            if (n.includes("espuma")) return "espuma";
             if (n.includes("marcador") || n.includes("marcadores")) return "marcadores";
             return "otros";
         }
@@ -205,8 +109,8 @@
             const precioMostrar = (precioOferta && precioOferta > 0) ? precioOferta : precioBase;
 
             const rutaImagen = prod.imagen
-                ? "../Model/" + prod.imagen           // ej: "imagenes/Pintura_acrilica.jpg"
-                : "../Model/imagenes/sin-imagen.png";
+                ? "../../Model/" + prod.imagen
+                : "../../Model/imagenes/sin-imagen.png";
 
             const tipo = detectarTipoDesdeNombre(prod.nombre);
 
@@ -232,11 +136,9 @@
             grid.innerHTML = "<p>Cargando productos...</p>";
 
             try {
-                // Asegúrate de que el slug de la categoría en la BD sea 'arte'
+                // Slug categoría: 'arte'
                 const resp = await fetch(`${API_URL}?accion=listarPorCategoria&categoria=arte`);
                 const data = await resp.json();
-
-                console.log("Arte API:", data);
 
                 if (data.error) {
                     grid.innerHTML = `<p>Error: ${data.error}</p>`;
@@ -272,7 +174,6 @@
             selectOrden.addEventListener("change", () => {
                 const opcion = selectOrden.value;
                 const cards = Array.from(grid.querySelectorAll(".product-card"));
-
                 if (opcion === "default") return;
 
                 cards.sort((a, b) => {
@@ -288,7 +189,6 @@
         /* -------- FILTROS -------- */
         function inicializarFiltrosArte() {
             const grid        = document.getElementById("gridArte");
-            const cards       = Array.from(grid.querySelectorAll(".product-card"));
             const selectTipo  = document.querySelector(".sidebar-select-tipo");
             const rangePrecio = document.querySelector(".sidebar-range");
             const infoPrecio  = document.querySelector(".sidebar-range-info");
@@ -300,11 +200,11 @@
                 infoPrecio.textContent = "Precio máx: $" + rangePrecio.value;
             });
 
-            function aplicarFiltros() {
+            btnFiltrar.addEventListener("click", () => {
                 const tipo = selectTipo.value;
                 const maxPrecio = parseFloat(rangePrecio.value);
 
-                cards.forEach(card => {
+                Array.from(grid.querySelectorAll(".product-card")).forEach(card => {
                     const precio = parseFloat(card.dataset.precio);
                     const t = card.dataset.tipo;
 
@@ -313,9 +213,7 @@
 
                     card.style.display = (okTipo && okPrecio) ? "" : "none";
                 });
-            }
-
-            btnFiltrar.addEventListener("click", aplicarFiltros);
+            });
         }
 
         /* -------- CARRITO -------- */
@@ -338,7 +236,7 @@
                 const nombre = card.querySelector("h3").textContent;
 
                 let carrito = obtenerCarrito();
-                let existe  = carrito.find(p => p.id === id);
+                const existe = carrito.find(p => p.id === id);
 
                 if (existe) existe.cantidad++;
                 else carrito.push({ id, nombre, precio, cantidad: 1 });
@@ -348,14 +246,23 @@
             });
         }
 
-        document.addEventListener("DOMContentLoaded", () => {
-            cargarProductosArte();
-        });
+        document.addEventListener("DOMContentLoaded", cargarProductosArte);
+
+        /* ===== ALIAS BUSCADOR (OPCIÓN 1) ===== */
+        function realizarBusquedaGlobal() {
+            const input = document.getElementById("buscador");
+            if (!input) return;
+            const q = input.value.trim();
+            if (!q) return;
+            window.location.href = "busqueda.html?q=" + encodeURIComponent(q);
+        }
     </script>
 
-    <!-- BUSCADOR GLOBAL + SESIÓN USUARIO -->
-    <script src="../Model/js/busqueda-global.js"></script>
-    <script src="../Model/js/sesion-usuario.js"></script>
+    <!-- ===== LAYOUT LOADER ===== -->
+    <script src="../js/layout-loader.js"></script>
+    <script>
+        loadLayout();
+    </script>
 
 </body>
 </html>

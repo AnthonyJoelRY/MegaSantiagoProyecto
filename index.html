@@ -5,50 +5,15 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>MegaSantiago | Inicio</title>
 
-    <!-- CSS ahora desde Model (index.html está en la raíz) -->
-    <link rel="stylesheet" href="Model/csss estilos/estilos.css">
+    <!-- ✅ CSS (con %20 por el espacio en la carpeta) -->
+    <link rel="stylesheet" href="Model/csss%20estilos/estilos.css">
 </head>
 <body>
 
-    <div class="top-bar">
-        <p>ENCUENTRA DE TODO EN MEGASANTIAGO - OFERTAS DEL MES</p>
-    </div>
-
-    <!-- ENCABEZADO -->
-    <header class="main-header">
-        <div class="header-left">
-            <img src="Model/imagenes/Logo_MegaSantiago.png" alt="MegaSantiago" class="logo-mega">
-        </div>
-
-        <div class="header-center">
-            <div class="search-box">
-                <input id="buscador" type="text" placeholder="Busca tu producto">
-                <button class="btn-search" type="button" onclick="realizarBusqueda()">
-                    <svg width="18" height="18" fill="white" viewBox="0 0 24 24">
-                        <path d="M21 20l-5.8-5.8a7 7 0 10-1.4 1.4L20 21zM5 11a6 6 0 1112 0A6 6 0 015 11z"/>
-                    </svg>
-                </button>
-            </div>
-        </div>
-
-        <!-- ESTE BLOQUE LO REEMPLAZA sesion-usuario.js SI HAY LOGIN -->
-        <div class="header-right" id="header-usuario">
-            <a href="View/login.html" class="link-header">Acceder / Registrarse</a>
-            <a href="View/carrito.html" class="link-header">🛒 Carrito</a>
-        </div>
-    </header>
-
-    <!-- NAV PRINCIPAL -->
-    <nav class="nav-principal">
-        <ul class="menu">
-            <li class="menu-item has-mega"><a href="View/bazar.html">BAZAR ▾</a></li>
-            <li class="menu-item has-sub"><a href="View/papeleria.html">PAPELERÍA ▾</a></li>
-            <li class="menu-item has-sub"><a href="View/productos-arte.html">PRODUCTOS DE ARTE ▾</a></li>
-            <li class="menu-item has-mega"><a href="View/suministros-oficina.html">SUMINISTROS DE OFICINA ▾</a></li>
-            <li class="menu-item has-sub"><a href="View/utiles-escolares.html">ÚTILES ESCOLARES ▾</a></li>
-            <li class="menu-item"><a href="#promociones">PROMOCIONES</a></li>
-        </ul>
-    </nav>
+    <!-- ===== LAYOUT ===== -->
+    <div id="header"></div>
+    <div id="nav"></div>
+    <!-- ================== -->
 
     <!-- BANNER -->
     <section class="banner-principal">
@@ -59,43 +24,29 @@
         </div>
     </section>
 
-    <!-- PRODUCTOS MÁS VENDIDOS (desde BD) -->
     <section class="seccion">
         <h2 class="titulo-seccion">Productos más vendidos</h2>
-
-        <div id="gridMasVendidos" class="grid-categorias grid-best-sellers">
-            <!-- Se llena con JS desde la BD -->
-        </div>
+        <div id="gridMasVendidos" class="grid-categorias grid-best-sellers"></div>
     </section>
 
-    <!-- PRODUCTOS DESTACADOS / OFERTAS (desde BD) -->
     <section class="seccion">
         <h2 class="titulo-seccion">Ofertas MegaSantiago</h2>
-
-        <div id="gridOfertas" class="carrusel-productos">
-            <!-- Se llena con JS desde la BD -->
-        </div>
+        <div id="gridOfertas" class="carrusel-productos"></div>
     </section>
 
-    <!-- PROMOCIONES ESPECIALES (desde BD) -->
     <section id="promociones" class="seccion">
         <h2 class="titulo-seccion">Promociones especiales</h2>
-
-        <div id="gridPromos" class="carrusel-productos">
-            <!-- Se llena con JS desde la BD (si quieres usar la tabla promociones) -->
-        </div>
+        <div id="gridPromos" class="carrusel-productos"></div>
     </section>
 
-    <footer class="footer">
-        <p>MegaSantiago © 2025 - Todos los derechos reservados</p>
-    </footer>
+    <!-- ===== FOOTER ===== -->
+    <div id="footer"></div>
+    <div id="scripts"></div>
+    <!-- ================== -->
 
-    <!-- ================= CONTROLADOR FRONT (BD + CARRITO) ================= -->
     <script>
-        /* OJO: ahora ruta RELATIVA al proyecto */
         const API_URL = "Controller/productosController.php";
 
-        /* ========= UTILIDADES ========= */
         function formatearDinero(valor) {
             return "$" + Number(valor).toFixed(2);
         }
@@ -112,11 +63,8 @@
             let carrito = obtenerCarrito();
             const existe = carrito.find(p => p.id === id);
 
-            if (existe) {
-                existe.cantidad++;
-            } else {
-                carrito.push({ id, nombre, precio, cantidad: 1 });
-            }
+            if (existe) existe.cantidad++;
+            else carrito.push({ id, nombre, precio, cantidad: 1 });
 
             guardarCarrito(carrito);
         }
@@ -137,7 +85,13 @@
             });
         }
 
-        /* ========= BÚSQUEDA ========= */
+        /* ✅ BasePath seguro: /MegaSantiagoFront */
+        function getBasePath() {
+            const parts = window.location.pathname.split("/").filter(Boolean);
+            return parts.length ? "/" + parts[0] : "";
+        }
+
+        /* ✅ Función real de búsqueda */
         function realizarBusqueda() {
             const input = document.getElementById("buscador");
             if (!input) return;
@@ -145,27 +99,26 @@
             const valor = input.value.trim();
             if (!valor) return;
 
-            window.location.href = "View/busqueda.html?q=" + encodeURIComponent(valor);
+            const base = getBasePath();
+            window.location.href = `${base}/View/pages/busqueda.html?q=${encodeURIComponent(valor)}`;
+        }
+
+        /* ✅ IMPORTANTÍSIMO: el header llama a realizarBusquedaGlobal() */
+        function realizarBusquedaGlobal() {
+            realizarBusqueda();
         }
 
         function irPromociones() {
             const seccion = document.getElementById("promociones");
-            if (seccion) {
-                seccion.scrollIntoView({ behavior: "smooth" });
-            }
+            if (seccion) seccion.scrollIntoView({ behavior: "smooth" });
         }
 
-        /* ========= RENDERIZADO HTML DESDE BD ========= */
-
-        // Tarjetas "más vendidos"
         function crearCardMasVendido(prod) {
-            const precioBase   = parseFloat(prod.precio);
+            const precioBase = parseFloat(prod.precio);
             const precioOferta = prod.precio_oferta ? parseFloat(prod.precio_oferta) : null;
             const precioMostrado = (precioOferta && precioOferta > 0) ? precioOferta : precioBase;
 
-            const rutaImagen = prod.imagen
-                ? "Model/" + prod.imagen          // prod.imagen = "imagenes/archivo.jpg"
-                : "Model/imagenes/sin-imagen.png";
+            const rutaImagen = prod.imagen ? "Model/" + prod.imagen : "Model/imagenes/sin-imagen.png";
 
             return `
                 <article class="card-categoria"
@@ -182,22 +135,18 @@
             `;
         }
 
-        // Tarjetas de "ofertas / carrusel"
         function crearCardOferta(prod) {
-            const precioBase   = parseFloat(prod.precio);
+            const precioBase = parseFloat(prod.precio);
             const precioOferta = prod.precio_oferta ? parseFloat(prod.precio_oferta) : null;
             const precioMostrado = (precioOferta && precioOferta > 0) ? precioOferta : precioBase;
 
-            // Calcular % descuento si hay oferta
             let textoDescuento = "";
             if (precioOferta && precioOferta > 0 && precioOferta < precioBase) {
                 const porc = Math.round((1 - (precioOferta / precioBase)) * 100);
                 textoDescuento = `-${porc}%`;
             }
 
-            const rutaImagen = prod.imagen
-                ? "Model/" + prod.imagen
-                : "Model/imagenes/sin-imagen.png";
+            const rutaImagen = prod.imagen ? "Model/" + prod.imagen : "Model/imagenes/sin-imagen.png";
 
             return `
                 <article class="card-producto"
@@ -223,8 +172,6 @@
             `;
         }
 
-        /* ========= CARGA DESDE LA API ========= */
-
         async function cargarMasVendidos() {
             const cont = document.getElementById("gridMasVendidos");
             if (!cont) return;
@@ -241,7 +188,6 @@
 
                 cont.innerHTML = data.map(crearCardMasVendido).join("");
                 wireBotonesCarrito("#gridMasVendidos .btn-best");
-
             } catch (err) {
                 console.error(err);
                 cont.innerHTML = "<p>Error al cargar los productos.</p>";
@@ -264,7 +210,6 @@
 
                 cont.innerHTML = data.map(crearCardOferta).join("");
                 wireBotonesCarrito("#gridOfertas .btn-add");
-
             } catch (err) {
                 console.error(err);
                 cont.innerHTML = "<p>Error al cargar las ofertas.</p>";
@@ -286,34 +231,44 @@
 
                 cont.innerHTML = data.map(crearCardOferta).join("");
                 wireBotonesCarrito("#gridPromos .btn-add");
-
             } catch (err) {
                 console.error(err);
                 cont.innerHTML = "<p>Error al cargar promociones.</p>";
             }
         }
 
-        /* ========= INICIALIZACIÓN ========= */
-        document.addEventListener("DOMContentLoaded", () => {
-            // Buscar con Enter
+        function initIndexPage() {
             const buscador = document.getElementById("buscador");
             if (buscador) {
                 buscador.addEventListener("keyup", e => {
-                    if (e.key === "Enter") {
-                        realizarBusqueda();
-                    }
+                    if (e.key === "Enter") realizarBusqueda();
                 });
             }
 
-            // Cargar secciones desde la BD
             cargarMasVendidos();
             cargarOfertas();
             cargarPromociones();
-        });
+        }
     </script>
 
-    <!-- SESIÓN USUARIO (reemplaza header-usuario si hay login) -->
-    <script src="Model/js/sesion-usuario.js"></script>
+    <!-- LAYOUT -->
+    <script src="View/js/layout-loader.js"></script>
+
+    <script>
+        loadLayout().then(() => {
+            initIndexPage();
+
+            // ✅ Cargar sesión usuario DESPUÉS del layout
+            const s = document.createElement("script");
+            s.src = "Model/js/sesion-usuario.js";
+            document.body.appendChild(s);
+
+            // ✅ (opcional) si tu header NO incluye busqueda-global.js, lo agregas:
+            // const b = document.createElement("script");
+            // b.src = "Model/js/busqueda-global.js";
+            // document.body.appendChild(b);
+        });
+    </script>
 
 </body>
 </html>
