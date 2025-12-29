@@ -1,0 +1,296 @@
+<!DOCTYPE html>
+<html lang="es">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>MegaSantiago | Inicio</title>
+
+    <!-- ✅ CSS (con %20 por el espacio en la carpeta) -->
+    <link rel="stylesheet" href="Model/csss%20estilos/estilos.css" />
+  </head>
+  <body>
+    <!-- ===== LAYOUT ===== -->
+    <div id="header"></div>
+    <div id="nav"></div>
+    <!-- ================== -->
+
+    <!-- BANNER -->
+    <section class="banner-principal">
+      <div class="banner-texto">
+        <h2>OFERTAS ESPECIALES MEGASANTIAGO</h2>
+        <p>Todo para tu oficina y tus clases al mejor precio.</p>
+        <button class="btn-primario" onclick="irPromociones()">
+          Ver promociones
+        </button>
+      </div>
+    </section>
+
+    <section class="seccion">
+      <h2 class="titulo-seccion">Productos más vendidos</h2>
+      <div id="gridMasVendidos" class="grid-categorias grid-best-sellers"></div>
+    </section>
+
+    <section class="seccion">
+      <h2 class="titulo-seccion">Ofertas MegaSantiago</h2>
+      <div id="gridOfertas" class="carrusel-productos"></div>
+    </section>
+
+    <section id="promociones" class="seccion">
+      <h2 class="titulo-seccion">Promociones especiales</h2>
+      <div id="gridPromos" class="carrusel-productos"></div>
+    </section>
+
+    <!-- ===== FOOTER ===== -->
+    <div id="footer"></div>
+    <div id="scripts"></div>
+    <!-- ================== -->
+
+    <script>
+      const API_URL = "Controller/productosController.php";
+
+      function resolverImagen(img) {
+      if (!img || String(img).trim() === "") return "Model/imagenes/sin-imagen.png";
+      const limpia = String(img).trim();
+      if (limpia.startsWith("http://") || limpia.startsWith("https://")) return limpia;
+      return "Model/" + limpia;
+    }
+
+    function formatearDinero(valor) {
+        return "$" + Number(valor).toFixed(2);
+      }
+
+      function obtenerCarrito() {
+        return JSON.parse(localStorage.getItem("carritoMega") || "[]");
+      }
+
+      function guardarCarrito(carrito) {
+        localStorage.setItem("carritoMega", JSON.stringify(carrito));
+      }
+
+      function agregarAlCarrito(id, nombre, precio) {
+        let carrito = obtenerCarrito();
+        const existe = carrito.find((p) => p.id === id);
+
+        if (existe) existe.cantidad++;
+        else carrito.push({ id, nombre, precio, cantidad: 1 });
+
+        guardarCarrito(carrito);
+      }
+
+      function wireBotonesCarrito(selector) {
+        document.querySelectorAll(selector).forEach((btn) => {
+          btn.addEventListener("click", () => {
+            const card = btn.closest("[data-id]");
+            if (!card) return;
+
+            agregarAlCarrito(
+              card.dataset.id,
+              card.dataset.nombre,
+              parseFloat(card.dataset.precio)
+            );
+            alert("Producto agregado al carrito");
+          });
+        });
+      }
+
+      /* ✅ BasePath seguro: /MegaSantiagoFront */
+      function getBasePath() {
+        const parts = window.location.pathname.split("/").filter(Boolean);
+        return parts.length ? "/" + parts[0] : "";
+      }
+
+      /* ✅ Función real de búsqueda */
+      function realizarBusqueda() {
+        const input = document.getElementById("buscador");
+        if (!input) return;
+
+        const valor = input.value.trim();
+        if (!valor) return;
+
+        const base = getBasePath();
+        window.location.href = `${base}/View/pages/busqueda.html?q=${encodeURIComponent(
+          valor
+        )}`;
+      }
+
+      /* ✅ IMPORTANTÍSIMO: el header llama a realizarBusquedaGlobal() */
+      function realizarBusquedaGlobal() {
+        realizarBusqueda();
+      }
+
+      function irPromociones() {
+        const seccion = document.getElementById("promociones");
+        if (seccion) seccion.scrollIntoView({ behavior: "smooth" });
+      }
+
+      function crearCardMasVendido(prod) {
+        const precio = parseFloat(prod.precio);
+        const rutaImagen = resolverImagen(prod.imagen);
+
+        return `
+        <article class="card-categoria"
+                 data-id="${prod.id}"
+                 data-nombre="${prod.nombre}"
+                 data-precio="${precio}">
+            <div class="circulo-img">
+                <img src="${rutaImagen}" alt="${prod.nombre}">
+            </div>
+            <h3>${prod.nombre}</h3>
+            <p class="best-price">${formatearDinero(precio)} + IVA</p>
+            <button class="btn-best">Agregar al carrito</button>
+        </article>
+    `;
+      }
+
+      function crearCardOferta(prod) {
+        const precioBase = parseFloat(prod.precio);
+        const precioOferta = prod.precio_oferta
+          ? parseFloat(prod.precio_oferta)
+          : null;
+        const precioMostrado =
+          precioOferta && precioOferta > 0 ? precioOferta : precioBase;
+
+        let textoDescuento = "";
+        if (precioOferta && precioOferta > 0 && precioOferta < precioBase) {
+          const porc = Math.round((1 - precioOferta / precioBase) * 100);
+          textoDescuento = `-${porc}%`;
+        }
+
+        const rutaImagen = resolverImagen(prod.imagen);
+
+        return `
+                <article class="card-producto"
+                         data-id="${prod.id}"
+                         data-nombre="${prod.nombre}"
+                         data-precio="${precioMostrado}">
+                    ${
+                      textoDescuento
+                        ? `<span class="descuento">${textoDescuento}</span>`
+                        : ""
+                    }
+                    <div class="img-producto">
+                        <img src="${rutaImagen}" alt="${prod.nombre}">
+                    </div>
+                    <p class="nombre-producto">${prod.nombre}</p>
+                    ${
+                      precioOferta &&
+                      precioOferta > 0 &&
+                      precioOferta < precioBase
+                        ? `
+                            <p class="precio-anterior">${formatearDinero(
+                              precioBase
+                            )}</p>
+                            <p class="precio-actual">${formatearDinero(
+                              precioMostrado
+                            )}</p>
+                          `
+                        : `
+                            <p class="precio-actual">${formatearDinero(
+                              precioMostrado
+                            )}</p>
+                          `
+                    }
+                    <button class="btn-add">+</button>
+                </article>
+            `;
+      }
+
+      async function cargarMasVendidos() {
+        const cont = document.getElementById("gridMasVendidos");
+        if (!cont) return;
+        cont.innerHTML = "<p>Cargando productos...</p>";
+
+        try {
+          const resp = await fetch(`${API_URL}?accion=masVendidos&limit=4`);
+          const data = await resp.json();
+
+          if (!Array.isArray(data) || data.length === 0) {
+            cont.innerHTML = "<p>No hay productos para mostrar.</p>";
+            return;
+          }
+
+          cont.innerHTML = data.map(crearCardMasVendido).join("");
+          wireBotonesCarrito("#gridMasVendidos .btn-best");
+        } catch (err) {
+          console.error(err);
+          cont.innerHTML = "<p>Error al cargar los productos.</p>";
+        }
+      }
+
+      async function cargarOfertas() {
+        const cont = document.getElementById("gridOfertas");
+        if (!cont) return;
+        cont.innerHTML = "<p>Cargando ofertas...</p>";
+
+        try {
+          const resp = await fetch(`${API_URL}?accion=ofertas&limit=6`);
+          const data = await resp.json();
+
+          if (!Array.isArray(data) || data.length === 0) {
+            cont.innerHTML = "<p>No hay ofertas disponibles.</p>";
+            return;
+          }
+
+          cont.innerHTML = data.map(crearCardOferta).join("");
+          wireBotonesCarrito("#gridOfertas .btn-add");
+        } catch (err) {
+          console.error(err);
+          cont.innerHTML = "<p>Error al cargar las ofertas.</p>";
+        }
+      }
+
+      async function cargarPromociones() {
+        const cont = document.getElementById("gridPromos");
+        if (!cont) return;
+
+        try {
+          const resp = await fetch(`${API_URL}?accion=ofertas&limit=3`);
+          const data = await resp.json();
+
+          if (!Array.isArray(data) || data.length === 0) {
+            cont.innerHTML = "<p>No hay promociones activas.</p>";
+            return;
+          }
+
+          cont.innerHTML = data.map(crearCardOferta).join("");
+          wireBotonesCarrito("#gridPromos .btn-add");
+        } catch (err) {
+          console.error(err);
+          cont.innerHTML = "<p>Error al cargar promociones.</p>";
+        }
+      }
+
+      function initIndexPage() {
+        const buscador = document.getElementById("buscador");
+        if (buscador) {
+          buscador.addEventListener("keyup", (e) => {
+            if (e.key === "Enter") realizarBusqueda();
+          });
+        }
+
+        cargarMasVendidos();
+        cargarOfertas();
+        cargarPromociones();
+      }
+    </script>
+
+    <!-- LAYOUT -->
+    <script src="View/js/layout-loader.js"></script>
+
+    <script>
+      loadLayout().then(() => {
+        initIndexPage();
+
+        // ✅ Cargar sesión usuario DESPUÉS del layout
+        const s = document.createElement("script");
+        s.src = "Model/js/sesion-usuario.js";
+        document.body.appendChild(s);
+
+        // ✅ (opcional) si tu header NO incluye busqueda-global.js, lo agregas:
+        // const b = document.createElement("script");
+        // b.src = "Model/js/busqueda-global.js";
+        // document.body.appendChild(b);
+      });
+    </script>
+  </body>
+</html>
