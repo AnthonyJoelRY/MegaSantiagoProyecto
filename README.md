@@ -242,16 +242,6 @@
 </p>
 
 <hr>
-
-<h2>Wireframe</h2>
-<p>
-  <a href="https://excalidraw.com/#json=_fcWCgIk4n3clVOwuzyCa,tix3LXE9W7AnRhXhoEdX8Q">
-    Enlace al wireframe del proyecto
-  </a>
-</p>
-
-<hr>
-
 <h2>Licencia</h2>
 <p>
   Este proyecto se distribuye bajo la <strong>Apache License, Version 2.0</strong>.
