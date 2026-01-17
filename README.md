@@ -1,80 +1,158 @@
-# 📘 MegaSantiago — Actualización de Interfaz Web (UI/UX)
-### *Librería & Papelería — Proyecto de Modernización Frontend*
+<h1>📘 MegaSantiago — Renovación del Portal Web (MVC + Ecommerce)</h1>
+<p><strong>Papelería MegaSantiago — Proyecto de rediseño, reconstrucción y modernización del sistema</strong></p>
 
-## 📌 Descripción del Proyecto
-Este repositorio contiene la actualización completa de la interfaz gráfica (frontend) del sitio web de la librería y papelería MegaSantiago, cuyo objetivo es modernizar su apariencia, mejorar la experiencia de usuario y optimizar la visualización de productos utilizando WordPress + WooCommerce.
+<hr>
 
-El proyecto NO crea la tienda desde cero.
-👉 Se centra en mejorar el diseño, navegación y funcionalidad visual del sitio.
+<h2>📌 Descripción del Proyecto</h2>
+<p>
+  Este repositorio contiene el desarrollo del sistema <strong>MegaSantiago</strong>, una nueva versión del portal web de la
+  <strong>Papelería MegaSantiago</strong>. La empresa contaba con un portal anterior que presentaba fallos funcionales,
+  problemas de usabilidad y limitaciones técnicas.  
+</p>
+<p>
+  El objetivo del proyecto fue <strong>reconstruir el sistema</strong> aplicando una arquitectura clara (MVC + Front Controller),
+  mejorando la estabilidad, seguridad, experiencia de usuario y habilitando funcionalidades clave como compras en línea,
+  gestión de inventario y pagos con PayPal.
+</p>
 
-## 📌 Objetivo General
-Actualizar la interfaz de MegaSantiago para ofrecer una experiencia de compra moderna, consistente, clara y visualmente atractiva, manteniendo compatibilidad con WooCommerce.
+<hr>
 
-## 📌 Objetivos Específicos
-- Rediseñar la página principal (Home) con un aspecto moderno.
-- Mejorar navegación por categorías.
-- Optimizar resultados de búsqueda.
-- Actualizar login y registro.
-- Corregir rutas de imágenes.
-- Modernizar el diseño del carrito.
-- Unificar estilos, colores y tarjetas de productos.
+<h2>🎯 Objetivo General</h2>
+<p>
+  Desarrollar un sistema web que permita a la Papelería MegaSantiago gestionar sus productos, clientes y pedidos de forma eficiente,
+  brindando a los usuarios una experiencia de compra clara, segura y accesible.
+</p>
 
-## 📌 Tecnologías Utilizadas
-- WordPress
-- WooCommerce
-- PHP
-- JavaScript / jQuery
-- HTML5
-- CSS3
-- GitHub
+<h2>✅ Objetivos Específicos</h2>
+<ul>
+  <li>Implementar autenticación y gestión de usuarios por roles.</li>
+  <li>Desarrollar módulo de gestión de productos e inventarios.</li>
+  <li>Permitir la realización de compras en línea.</li>
+  <li>Integrar una pasarela de pago segura (PayPal).</li>
+  <li>Facilitar la visualización y seguimiento de pedidos por parte del cliente.</li>
+  <li>Mejorar la experiencia de usuario mediante una interfaz responsiva.</li>
+</ul>
 
-## 📌 Cambios Realizados
-### 🔹 Home modernizado
-- Banner promocional
-- Sección de productos destacados
+<hr>
 
-### 🔹 Categorías actualizadas
-- Productos con tarjetas uniformes
-- Mejor organización visual
+<h2>🧩 Funcionalidades Principales</h2>
+<ul>
+  <li><strong>Catálogo de productos</strong> (visualización, detalle, búsqueda y productos relacionados).</li>
+  <li><strong>Carrito de compras</strong> con validación de stock.</li>
+  <li><strong>Pedidos</strong> (registro, detalle, estado y visualización por cliente).</li>
+  <li><strong>Direcciones / Retiro en sucursal</strong> según el flujo de compra.</li>
+  <li><strong>Panel administrativo</strong> para gestión de productos e inventario.</li>
+  <li><strong>Pago con PayPal</strong> (Sandbox/Live).</li>
+  <li><strong>Recuperación de contraseña</strong> (flujo de reseteo).</li>
+</ul>
 
-### 🔹 Búsqueda mejorada
-- Resultados más limpios
-- Imágenes corregidas
+<hr>
 
-### 🔹 Login y registro rediseñados
-- Formularios minimalistas y responsivos
+<h2>🧱 Arquitectura</h2>
+<p>
+  El sistema utiliza <strong>MVC</strong> reforzado con <strong>Front Controller</strong> (punto único de entrada),
+  además de capas de <strong>Service</strong>, <strong>DAO</strong> y <strong>Entity</strong>.
+</p>
 
-### 🔹 Carrito modernizado
-- Interfaz limpia y organizada
+<ul>
+  <li><strong>Front Controller:</strong> <code>index.php</code> + <code>.htaccess</code></li>
+  <li><strong>Controllers:</strong> <code>Controller/</code></li>
+  <li><strong>Model:</strong> <code>Model/</code> (DAO, Entity, Service, Config, DB)</li>
+  <li><strong>Views:</strong> <code>View/</code> (público y panel)</li>
+</ul>
 
-### 🔹 Corrección de imágenes
-Productos corregidos:
-- Mochila juvenil
-- Cartulina IRIS
-- Cuaderno universitario 100 hojas
-- Otros artículos escolares
+<hr>
 
-## 📌 Conclusiones
-- Interfaz moderna y clara
-- Mejor experiencia de usuario
-- Base visual lista para ventas reales
-- Preparado para integración de métodos de pago
+<h2>🧰 Tecnologías Utilizadas</h2>
+<ul>
+  <li><strong>Backend:</strong> PHP 8, PDO</li>
+  <li><strong>Base de datos:</strong> MySQL</li>
+  <li><strong>Frontend:</strong> HTML5, CSS3, JavaScript</li>
+  <li><strong>UI Panel:</strong> Bootstrap 5</li>
+  <li><strong>Servicios externos:</strong> PayPal API</li>
+  <li><strong>Hosting:</strong> InfinityFree (Apache + MySQL)</li>
+  <li><strong>Herramientas:</strong> XAMPP (local), GitHub (Wiki/Control de versiones)</li>
+</ul>
 
-## 📌 Repositorio Oficial
-🔗 https://github.com/AnthonyJoelRY/ProyectoMegaSantiagoFront
-## link de wiframe: 
-https://excalidraw.com/#json=_fcWCgIk4n3clVOwuzyCa,tix3LXE9W7AnRhXhoEdX8Q
+<hr>
 
-## 📩 Autor
-Anthony Joel Romero Yaguana
-Proyecto de actualización frontend — UTPL
+<h2>🔐 Roles y Permisos (RBAC)</h2>
+<ul>
+  <li><strong>Administrador:</strong> control total del sistema y panel.</li>
+  <li><strong>Empleado:</strong> gestión operativa de productos/pedidos en panel.</li>
+  <li><strong>Cliente:</strong> compras, direcciones y visualización de sus pedidos.</li>
+  <li><strong>Visitante:</strong> navegación del catálogo sin acceso a compras.</li>
+</ul>
 
+<hr>
 
-## PayPal Sandbox (carrito)
+<h2>🚀 Instalación y Configuración (InfinityFree)</h2>
+<p>
+  Para desplegar el sistema en un dominio (InfinityFree), se realizan 2 acciones principales:
+</p>
+<ol>
+  <li><strong>Subir el proyecto</strong> al directorio público del dominio (ej: <code>htdocs/</code>).</li>
+  <li><strong>Crear base de datos</strong> en el hosting e importar el <code>.sql</code>.</li>
+</ol>
 
-- Configura tus credenciales en `Model/paypal_credentials.php`.
-- El carrito (`View/pages/carrito.html`) carga el SDK de PayPal dinámicamente y usa estos endpoints:
-  - `Controller/paypalController.php?accion=config`
-  - `Controller/paypalController.php?accion=create-order`
-  - `Controller/paypalController.php?accion=capture-order`
+<p><strong>Configurar credenciales obligatorias:</strong></p>
+<ul>
+  <li><strong>Base de datos:</strong> editar <code>Model/Config/credenciales.php</code></li>
+  <li><strong>PayPal:</strong> editar credenciales (Client ID / Secret) en el archivo de configuración correspondiente del proyecto</li>
+</ul>
+
+<hr>
+
+<h2>💳 PayPal Sandbox (Checkout)</h2>
+<ul>
+  <li>Configura tus credenciales en el archivo de PayPal del proyecto (Client ID / Secret).</li>
+  <li>El carrito (ej: <code>View/pages/carrito.html</code>) carga el SDK de PayPal y usa endpoints del backend:</li>
+</ul>
+
+<ul>
+  <li><code>Controller/paypalController.php?accion=config</code></li>
+  <li><code>Controller/paypalController.php?accion=create-order</code></li>
+  <li><code>Controller/paypalController.php?accion=capture-order</code></li>
+</ul>
+
+<hr>
+
+<h2>📚 Documentación (GitHub Wiki)</h2>
+<p>
+  La documentación técnica y funcional del proyecto está disponible en la Wiki:
+</p>
+<p>
+  <a href="https://github.com/AnthonyJoelRY/MegaSantiagoFront/wiki">https://github.com/AnthonyJoelRY/MegaSantiagoFront/wiki</a>
+</p>
+
+<p><strong>Índice de la Wiki:</strong></p>
+<ol>
+  <li><a href="https://github.com/AnthonyJoelRY/MegaSantiagoFront/wiki/01%E2%80%90Descripci%C3%B3n-del-Proyecto">Descripción del Proyecto</a></li>
+  <li><a href="https://github.com/AnthonyJoelRY/MegaSantiagoFront/wiki/02%E2%80%90Requisitos-del-Sistema">Requisitos del Sistema</a></li>
+  <li><a href="https://github.com/AnthonyJoelRY/MegaSantiagoFront/wiki/03%E2%80%90Diagramas-del-Sistema">Diagramas del Sistema</a></li>
+  <li><a href="https://github.com/AnthonyJoelRY/MegaSantiagoFront/wiki/04%E2%80%90Arquitectura-y-Dise%C3%B1o">Arquitectura y Diseño</a></li>
+  <li><a href="https://github.com/AnthonyJoelRY/MegaSantiagoFront/wiki/05%E2%80%90C%C3%B3digo-Fuente">Código Fuente</a></li>
+  <li><a href="https://github.com/AnthonyJoelRY/MegaSantiagoFront/wiki/06%E2%80%90Tecnolog%C3%ADas-Utilizadas">Tecnologías Utilizadas</a></li>
+  <li><a href="https://github.com/AnthonyJoelRY/MegaSantiagoFront/wiki/07%E2%80%90Instalaci%C3%B3n-y-Configuraci%C3%B3n">Instalación y Configuración</a></li>
+  <li><a href="https://github.com/AnthonyJoelRY/MegaSantiagoFront/wiki/08%E2%80%90Roles-y-Permisos">Roles y Permisos</a></li>
+</ol>
+
+<hr>
+
+<h2>🧾 Wireframe</h2>
+<p>
+  Enlace al wireframe (Excalidraw):
+  <a href="https://excalidraw.com/#json=_fcWCgIk4n3clVOwuzyCa,tix3LXE9W7AnRhXhoEdX8Q">
+    https://excalidraw.com/#json=_fcWCgIk4n3clVOwuzyCa,tix3LXE9W7AnRhXhoEdX8Q
+  </a>
+</p>
+
+<hr>
+
+<h2>📄 Licencia</h2>
+<p>
+  Este proyecto se distribuye bajo la <strong>Apache License, Version 2.0</strong>.
+</p>
+
+<hr>
 
