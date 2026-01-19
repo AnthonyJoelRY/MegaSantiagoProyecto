@@ -97,22 +97,58 @@
                     </div>
 
                     <div class="mb-4">
-                        <label class="form-label fw-semibold">Imagen del producto</label>
+                        <label class="form-label fw-semibold">Imagenes del producto</label>
 
-                        <!-- Seleccionar archivo y subir a Firebase Storage -->
-                        <input type="file" id="fileImagen" accept="image/*" class="form-control" required>
+                        <input type="file" id="fileImagenes" accept="image/*" class="form-control" multiple required>
 
-                        <!-- URL final de Firebase -->
                         <input type="hidden" name="imagen" id="imagenUrl" required>
+                        <input type="hidden" name="imagenes_json" id="imagenesJson">
 
-                        <small class="text-muted d-block mt-2" id="estadoUpload">
-                            Selecciona una imagen para subirla a Firebase.
-                        </small>
+                        <small class="text-muted d-block mt-2" id="estadoUpload">Selecciona una o mas imagenes para subirlas a Firebase.</small>
+                        <div id="previewImgs" class="d-flex flex-wrap gap-2 mt-3"></div>
                     </div>
 
                     <div class="form-check mb-3">
                         <input class="form-check-input" type="checkbox" name="aplica_iva" checked>
                         <label class="form-check-label">Aplica IVA</label>
+                    </div>
+
+                    <!-- ✅ COLORES (un producto puede tener varios) -->
+                    <div class="mb-3">
+                        <label class="form-label fw-semibold">Colores del producto (opcional)</label>
+                        <div class="row g-2">
+                            <?php if (!empty($colores)): ?>
+                                <?php foreach ($colores as $c): ?>
+                                    <div class="col-6 col-md-4 col-lg-3">
+                                        <label class="d-flex align-items-center gap-2 border rounded-3 p-2" style="cursor:pointer;">
+                                            <input type="checkbox" name="colores[]" value="<?= (int)$c['id_color'] ?>">
+                                            <span style="width:18px;height:18px;border-radius:999px;border:1px solid #ddd;display:inline-block;background:<?= htmlspecialchars($c['codigo_hex']) ?>;"></span>
+                                            <span><?= htmlspecialchars($c['nombre']) ?></span>
+                                        </label>
+                                    </div>
+                                <?php endforeach; ?>
+                            <?php else: ?>
+                                <div class="col-12">
+                                    <div class="alert alert-secondary mb-0">
+                                        Aún no hay colores registrados. Puedes crear uno abajo.
+                                    </div>
+                                </div>
+                            <?php endif; ?>
+                        </div>
+
+                        <div class="mt-3 p-3 border rounded-3 bg-white">
+                            <div class="row g-2">
+                                <div class="col-md-6">
+                                    <label class="form-label">Nuevo color (nombre)</label>
+                                    <input type="text" name="nuevo_color_nombre" class="form-control" placeholder="Ej: Rojo">
+                                </div>
+                                <div class="col-md-6">
+                                    <label class="form-label">Código HEX</label>
+                                    <input type="text" name="nuevo_color_hex" class="form-control" placeholder="#FF0000">
+                                </div>
+                            </div>
+                            <small class="text-muted">Si escribes un nuevo color, se creará (si no existe) y se asignará al producto.</small>
+                        </div>
                     </div>
 
                     <button type="submit" id="btnGuardar" class="btn btn-primary">
@@ -150,27 +186,17 @@
         const app = initializeApp(firebaseConfig);
         const storage = getStorage(app);
 
-        const fileInput = document.getElementById("fileImagen");
+
+
+        const fileInput = document.getElementById("fileImagenes");
         const estado = document.getElementById("estadoUpload");
+        const preview = document.getElementById("previewImgs");
         const imagenUrl = document.getElementById("imagenUrl");
+        const imagenesJson = document.getElementById("imagenesJson");
         const form = document.querySelector("form");
         const btnGuardar = document.getElementById("btnGuardar");
 
-form.addEventListener("submit", (e) => {
-  // Evitar enviar si la imagen no está lista
-  if (!imagenUrl.value) {
-    e.preventDefault();
-    alert("Primero selecciona una imagen y espera a que se suba a Firebase.");
-    return;
-  }
-
-  // Bloquear doble envío
-  if (btnGuardar) {
-    btnGuardar.disabled = true;
-    btnGuardar.innerText = "Guardando...";
-  }
-});
-
+        let imagenes = []; // [{url, principal}]
 
         function nombreSeguro(nombre) {
             return nombre
@@ -183,37 +209,103 @@ form.addEventListener("submit", (e) => {
             const stamp = Date.now();
             const path = `productos/${stamp}_${nombreSeguro(file.name)}`;
             const storageRef = ref(storage, path);
-
-            await uploadBytes(storageRef, file, {
-                contentType: file.type
-            });
+            await uploadBytes(storageRef, file, { contentType: file.type });
             return await getDownloadURL(storageRef);
         }
 
-        fileInput.addEventListener("change", async () => {
-            const file = fileInput.files?.[0];
-            if (!file) return;
+        function syncHidden() {
+            // Asegurar que exista 1 principal
+            if (imagenes.length > 0 && !imagenes.some(i => i.principal)) {
+                imagenes[0].principal = true;
+            }
+            const principal = imagenes.find(i => i.principal);
+            imagenUrl.value = principal ? principal.url : "";
+            imagenesJson.value = JSON.stringify(imagenes);
+        }
 
-            estado.textContent = "Subiendo imagen a Firebase...";
-            imagenUrl.value = "";
+        function renderPreview() {
+            if (!preview) return;
+            preview.innerHTML = "";
+            imagenes.forEach((img, idx) => {
+                const card = document.createElement("div");
+                card.style.cssText = "width:110px;border:1px solid #e5e5e5;border-radius:12px;padding:8px;display:flex;flex-direction:column;gap:6px;align-items:center;background:#fff;";
+
+                const im = document.createElement("img");
+                im.src = img.url;
+                im.alt = "img";
+                im.style.cssText = "width:90px;height:70px;object-fit:cover;border-radius:10px;";
+
+                const badge = document.createElement("div");
+                badge.textContent = img.principal ? "Principal" : "";
+                badge.style.cssText = "font-size:11px;color:#0d6efd;min-height:14px;";
+
+                const btnPrincipal = document.createElement("button");
+                btnPrincipal.type = "button";
+                btnPrincipal.className = "btn btn-sm btn-outline-primary";
+                btnPrincipal.textContent = "Hacer principal";
+                btnPrincipal.disabled = img.principal;
+                btnPrincipal.addEventListener("click", () => {
+                    imagenes = imagenes.map((x, i) => ({...x, principal: i === idx}));
+                    syncHidden();
+                    renderPreview();
+                });
+
+                const btnEliminar = document.createElement("button");
+                btnEliminar.type = "button";
+                btnEliminar.className = "btn btn-sm btn-outline-danger";
+                btnEliminar.textContent = "Quitar";
+                btnEliminar.addEventListener("click", () => {
+                    imagenes.splice(idx, 1);
+                    syncHidden();
+                    renderPreview();
+                });
+
+                card.appendChild(im);
+                card.appendChild(badge);
+                card.appendChild(btnPrincipal);
+                card.appendChild(btnEliminar);
+                preview.appendChild(card);
+            });
+        }
+
+        fileInput.addEventListener("change", async () => {
+            const files = Array.from(fileInput.files || []);
+            if (files.length === 0) return;
+
+            if (btnGuardar) btnGuardar.disabled = true;
+            estado.textContent = "Subiendo imagenes a Firebase...";
 
             try {
-                const url = await subirImagen(file);
-                imagenUrl.value = url;
-                estado.textContent = "✅ Imagen subida correctamente.";
+                for (const f of files) {
+                    const url = await subirImagen(f);
+                    imagenes.push({ url, principal: imagenes.length === 0 });
+                }
+                estado.textContent = "Imagenes subidas correctamente.";
+                syncHidden();
+                renderPreview();
             } catch (e) {
                 console.error(e);
-                estado.textContent = "❌ Error subiendo imagen. Revisa Rules de Storage y consola.";
+                estado.textContent = "Error subiendo imagenes. Revisa Rules de Storage y consola.";
+            } finally {
+                // permitir re-seleccionar las mismas imagenes
+                fileInput.value = "";
+                if (btnGuardar) btnGuardar.disabled = false;
             }
         });
 
         form.addEventListener("submit", (e) => {
+            syncHidden();
             if (!imagenUrl.value) {
                 e.preventDefault();
-                alert("Primero selecciona una imagen y espera a que se suba a Firebase.");
+                alert("Debes subir al menos 1 imagen y marcar una como principal.");
+                return;
+            }
+            if (btnGuardar) {
+                btnGuardar.disabled = true;
+                btnGuardar.innerText = "Guardando...";
             }
         });
-    </script>
+</script>
 
 </body>
 

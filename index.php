@@ -62,6 +62,17 @@ $publicMap = [
     'suministros-oficina' => 'suministros-oficina.html',
     'utiles-escolares'    => 'utiles-escolares.html',
 ];
+// ==============================
+// 2.1) API pública promociones (carrusel)
+// ==============================
+if ($lower === 'promociones/publicas') {
+    require_once __DIR__ . '/Model/DAO/PromocionDAO.php';
+    require_once __DIR__ . '/Controller/PromocionesController.php';
+
+    (new PromocionesController())->publicas();
+    exit;
+}
+
 
 if (isset($publicMap[$lower])) {
     $file = __DIR__ . '/View/pages/' . $publicMap[$lower];
@@ -196,6 +207,29 @@ if (str_starts_with($lower, 'panel/')) {
         require_once __DIR__ . '/Controller/Admin/InventarioSucursalController.php';
         $c = new InventarioSucursalController();
         if ($action === 'acciones') { $c->acciones(); exit; }
+    }
+
+        // Promociones
+    if ($sub === 'promociones') {
+        require_once __DIR__ . '/Controller/Admin/PromocionesController.php';
+        (new PromocionesController())->index();
+        exit;
+    }
+
+    if (str_starts_with($sub, 'promociones/')) {
+        $action = substr($sub, strlen('promociones/'));
+        require_once __DIR__ . '/Controller/Admin/PromocionesController.php';
+        $c = new PromocionesController();
+
+        if ($action === 'crear') {
+            $c->crear();
+            exit;
+        }
+
+        if ($action === 'acciones') {
+            $c->acciones();
+            exit;
+        }
     }
 
     http_response_code(404);

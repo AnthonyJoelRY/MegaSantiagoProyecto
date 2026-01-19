@@ -3,11 +3,19 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>MegaSantiago | Productos de Arte</title>
+  <title>MegaSantiago | Suministros de oficina</title>
 
   <!-- ✅ InfinityFree: rutas absolutas -->
   <link rel="stylesheet" href="/View/assets/css/estilos.css">
   <link rel="stylesheet" href="/View/assets/css/overrides.css">
+    <!-- Bootstrap CSS -->
+<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+
+<!-- Bootstrap Icons -->
+<link href="https://cdn.jsdelivr.net/npm/bootstrap-icons/font/bootstrap-icons.css" rel="stylesheet">
+
+<!-- CSS del footer -->
+<link rel="stylesheet" href="/View/assets/css/footer.css">
 </head>
 
 <body>
@@ -20,8 +28,8 @@
   <!-- HERO -->
   <section class="category-hero">
     <div class="category-hero-inner">
-      <h1>Productos de Arte</h1>
-      <p>Materiales para dibujo, pintura y manualidades creativas.</p>
+      <h1>Suministros de oficina</h1>
+      <p>Todo para tu escritorio, archivo y área administrativa.</p>
     </div>
   </section>
 
@@ -35,8 +43,8 @@
         <ul class="category-list">
           <li><a href="bazar.html">Bazar</a></li>
           <li><a href="papeleria.html">Papelería</a></li>
-          <li class="active"><a href="productos-arte.html">Productos de arte</a></li>
-          <li><a href="suministros-oficina.html">Suministros de oficina</a></li>
+          <li><a href="productos-arte.html">Productos de arte</a></li>
+          <li class="active"><a href="suministros-oficina.html">Suministros de oficina</a></li>
           <li><a href="utiles-escolares.html">Útiles escolares</a></li>
         </ul>
 
@@ -45,16 +53,16 @@
           <label class="sidebar-label">Tipo</label>
           <select class="sidebar-select sidebar-select-tipo">
             <option value="todos">Cualquier tipo</option>
-            <option value="acrilica">Pintura acrílica</option>
-            <option value="espuma">Espuma flex</option>
-            <option value="marcadores">Marcadores</option>
+            <option value="archivadores">Archivadores</option>
+            <option value="escritura">Escritura</option>
+            <option value="organizacion">Organización</option>
           </select>
         </div>
 
         <div class="sidebar-block">
           <h4>Filtrar por precio</h4>
-          <input type="range" min="0" max="100" value="40" class="sidebar-range">
-          <div class="sidebar-range-info">Precio máx: $40</div>
+          <input type="range" min="0" max="150" value="60" class="sidebar-range">
+          <div class="sidebar-range-info">Precio máx: $60</div>
           <button class="btn-sidebar">FILTRAR</button>
         </div>
       </aside>
@@ -62,11 +70,11 @@
       <!-- PRODUCTOS -->
       <section class="category-main">
         <div class="category-main-header">
-          <p id="textoResultadosArte">Mostrando 0 resultados</p>
+          <p id="textoResultadosOficina">Mostrando 0 resultados</p>
 
           <div class="category-sort">
-            <label for="ordenArte">Ordenar por:</label>
-            <select id="ordenArte" class="sidebar-select">
+            <label for="ordenOficina">Ordenar por:</label>
+            <select id="ordenOficina" class="sidebar-select">
               <option value="default">Predeterminado</option>
               <option value="precio-asc">Precio: menor a mayor</option>
               <option value="precio-desc">Precio: mayor a menor</option>
@@ -74,7 +82,7 @@
           </div>
         </div>
 
-        <div id="gridArte" class="product-grid"></div>
+        <div id="gridOficina" class="product-grid"></div>
       </section>
 
     </div>
@@ -89,12 +97,12 @@
   <script src="/View/assets/js/layout-loader.js"></script>
 
   <!-- ✅ Lógica de esta página -->
-  <script src="/View/assets/js/pages/productos-arte.js"></script>
+  <script src="/View/assets/js/pages/suministros-oficina.js"></script>
 
   <!-- ✅ Ejecutar después de loadLayout -->
   <script>
     loadLayout().then(() => {
-      window.initArtePage?.();
+      window.initOficinaPage?.();
 
       // (Opcional) sesión usuario
       const s = document.createElement("script");

@@ -9,6 +9,7 @@ require_once __DIR__ . "/../Entity/PedidoDetalle.php";
 class PedidoDetalleDAO
 {
     private bool $idDetalleAutoIncrement = true;
+    private bool $hasColorColumn = false;
 
     public function __construct(private PDO $pdo)
     {
@@ -28,6 +29,16 @@ class PedidoDetalleDAO
         } catch (Throwable $e) {
             // Si algo falla en la detección, asumimos AUTO_INCREMENT para no romper.
             $this->idDetalleAutoIncrement = true;
+        }
+
+        // Columna opcional `color`
+        try {
+            $stmt2 = $this->pdo->prepare("SHOW COLUMNS FROM `pedido_detalle` LIKE 'color'");
+            $stmt2->execute();
+            $col2 = $stmt2->fetch(PDO::FETCH_ASSOC) ?: [];
+            $this->hasColorColumn = !empty($col2);
+        } catch (Throwable $e) {
+            $this->hasColorColumn = false;
         }
     }
 
@@ -62,9 +73,15 @@ class PedidoDetalleDAO
     public function insertar(array $data): int
     {
         // Si NO es AUTO_INCREMENT, debemos incluir id_detalle sí o sí.
+        $keysBase = ["id_pedido", "id_producto", "cantidad", "precio_unit", "subtotal"];
+        if ($this->hasColorColumn) {
+            // opcional
+            $keysBase[] = "color";
+        }
+
         $keys = $this->idDetalleAutoIncrement
-            ? ["id_pedido", "id_producto", "cantidad", "precio_unit", "subtotal"]
-            : ["id_detalle", "id_pedido", "id_producto", "cantidad", "precio_unit", "subtotal"];
+            ? $keysBase
+            : array_merge(["id_detalle"], $keysBase);
 
         $row = $this->filtrar($data, $keys);
 
@@ -74,15 +91,29 @@ class PedidoDetalleDAO
                 $row['id_detalle'] = $this->nextIdDetalle();
             }
 
-            $sql = "INSERT INTO `pedido_detalle`
-                (`id_detalle`,`id_pedido`,`id_producto`,`cantidad`,`precio_unit`,`subtotal`)
-                VALUES
-                (:id_detalle,:id_pedido,:id_producto,:cantidad,:precio_unit,:subtotal)";
+            if ($this->hasColorColumn) {
+                $sql = "INSERT INTO `pedido_detalle`
+                    (`id_detalle`,`id_pedido`,`id_producto`,`color`,`cantidad`,`precio_unit`,`subtotal`)
+                    VALUES
+                    (:id_detalle,:id_pedido,:id_producto,:color,:cantidad,:precio_unit,:subtotal)";
+            } else {
+                $sql = "INSERT INTO `pedido_detalle`
+                    (`id_detalle`,`id_pedido`,`id_producto`,`cantidad`,`precio_unit`,`subtotal`)
+                    VALUES
+                    (:id_detalle,:id_pedido,:id_producto,:cantidad,:precio_unit,:subtotal)";
+            }
         } else {
-            $sql = "INSERT INTO `pedido_detalle`
-                (`id_pedido`,`id_producto`,`cantidad`,`precio_unit`,`subtotal`)
-                VALUES
-                (:id_pedido,:id_producto,:cantidad,:precio_unit,:subtotal)";
+            if ($this->hasColorColumn) {
+                $sql = "INSERT INTO `pedido_detalle`
+                    (`id_pedido`,`id_producto`,`color`,`cantidad`,`precio_unit`,`subtotal`)
+                    VALUES
+                    (:id_pedido,:id_producto,:color,:cantidad,:precio_unit,:subtotal)";
+            } else {
+                $sql = "INSERT INTO `pedido_detalle`
+                    (`id_pedido`,`id_producto`,`cantidad`,`precio_unit`,`subtotal`)
+                    VALUES
+                    (:id_pedido,:id_producto,:cantidad,:precio_unit,:subtotal)";
+            }
         }
 
         $stmt = $this->pdo->prepare($sql);
@@ -111,16 +142,28 @@ class PedidoDetalleDAO
     public function actualizar(int $id, array $data): bool
     {
         $keys = ["id_pedido", "id_producto", "cantidad", "precio_unit", "subtotal"];
+        if ($this->hasColorColumn) $keys[] = "color";
         $row = $this->filtrar($data, $keys);
         $row["id"] = $id;
 
-        $sql = "UPDATE `pedido_detalle` SET
-            `id_pedido` = :id_pedido,
-            `id_producto` = :id_producto,
-            `cantidad` = :cantidad,
-            `precio_unit` = :precio_unit,
-            `subtotal` = :subtotal
-            WHERE `id_detalle` = :id";
+        if ($this->hasColorColumn) {
+            $sql = "UPDATE `pedido_detalle` SET
+                `id_pedido` = :id_pedido,
+                `id_producto` = :id_producto,
+                `color` = :color,
+                `cantidad` = :cantidad,
+                `precio_unit` = :precio_unit,
+                `subtotal` = :subtotal
+                WHERE `id_detalle` = :id";
+        } else {
+            $sql = "UPDATE `pedido_detalle` SET
+                `id_pedido` = :id_pedido,
+                `id_producto` = :id_producto,
+                `cantidad` = :cantidad,
+                `precio_unit` = :precio_unit,
+                `subtotal` = :subtotal
+                WHERE `id_detalle` = :id";
+        }
 
         $stmt = $this->pdo->prepare($sql);
         return $stmt->execute($row);

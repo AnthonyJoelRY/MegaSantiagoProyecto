@@ -5,6 +5,9 @@ error_reporting(E_ALL);
 
 header("Content-Type: application/json; charset=UTF-8");
 
+// Evita desfases entre PHP y MySQL (hosting suele estar en UTC)
+date_default_timezone_set('America/Guayaquil');
+
 try {
     $data = json_decode(file_get_contents("php://input"), true);
 

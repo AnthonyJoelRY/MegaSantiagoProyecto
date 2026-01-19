@@ -103,6 +103,7 @@
                         <thead class="table-light">
                         <tr>
                             <th>Producto</th>
+                            <th>Color</th>
                             <th>Cantidad</th>
                             <th>Precio</th>
                             <th>Subtotal</th>
@@ -112,7 +113,7 @@
                         <tbody>
                         <?php if (empty($detalles)): ?>
                             <tr>
-                                <td colspan="4" class="text-center text-muted py-4">
+                                <td colspan="5" class="text-center text-muted py-4">
                                     No hay productos en este pedido.
                                 </td>
                             </tr>
@@ -120,6 +121,7 @@
                             <?php foreach ($detalles as $d): ?>
                                 <tr>
                                     <td><?= htmlspecialchars($d["nombre"] ?? "") ?></td>
+                                    <td><?= htmlspecialchars(($d["color"] ?? '') !== '' ? (string)$d["color"] : '-') ?></td>
                                     <td><?= (int)($d["cantidad"] ?? 0) ?></td>
                                     <td>$<?= number_format((float)($d["precio_unit"] ?? 0), 2) ?></td>
                                     <td>$<?= number_format((float)($d["subtotal"] ?? 0), 2) ?></td>

@@ -31,8 +31,22 @@ class AdminProductoService {
         return $this->dao->categoriasActivas();
     }
 
+    public function colores(): array {
+        return $this->dao->listarColoresActivos();
+    }
+
+    /** @return int[] */
+    public function coloresDelProducto(int $idProducto): array {
+        return $this->dao->obtenerIdsColoresDeProducto($idProducto);
+    }
+
     public function obtener($id) {
-        return $this->dao->obtenerPorId((int)$id);
+        $id = (int)$id;
+        $prod = $this->dao->obtenerPorId($id);
+        if ($prod) {
+            $prod['imagenes'] = $this->dao->obtenerImagenesProducto($id);
+        }
+        return $prod;
     }
 
     public function crear($post) {
@@ -89,7 +103,43 @@ if ($stockMinimo < 0) {
 
             $this->dao->insertarInventarioConStock($idProducto, $stock);
 
-            if ($imagen !== "") {
+            // ✅ Colores seleccionados / nuevo color (no rompe si tablas no existen)
+            $idsColores = [];
+            if (isset($post["colores"])) {
+                $idsColores = is_array($post["colores"]) ? $post["colores"] : [$post["colores"]];
+            }
+
+            $nuevoNombre = trim($post["nuevo_color_nombre"] ?? "");
+            $nuevoHex    = trim($post["nuevo_color_hex"] ?? "");
+            if ($nuevoNombre !== "") {
+                $idNuevo = $this->dao->crearColorSiNoExiste($nuevoNombre, $nuevoHex);
+                if ($idNuevo) $idsColores[] = $idNuevo;
+            }
+            $this->dao->reemplazarColoresDeProducto($idProducto, $idsColores);
+            // Imagenes (principal + adicionales)
+            $imagenesJson = trim($post["imagenes_json"] ?? "");
+            if ($imagenesJson !== "") {
+                $arr = json_decode($imagenesJson, true);
+                if (is_array($arr) && count($arr) > 0) {
+                    $tienePrincipal = false;
+                    foreach ($arr as $it) {
+                        if (!empty($it["principal"])) { $tienePrincipal = true; break; }
+                    }
+                    $orden = 0;
+                    foreach ($arr as $idx => $it) {
+                        $url = trim($it["url"] ?? "");
+                        if ($url === "") continue;
+                        $esPrincipal = !empty($it["principal"]) || (!$tienePrincipal && $idx === 0);
+                        if ($esPrincipal) {
+                            $this->dao->insertarImagen($idProducto, $url, 1, 0);
+                        } else {
+                            $orden++;
+                            $this->dao->insertarImagen($idProducto, $url, 0, $orden);
+                        }
+                    }
+                }
+            } elseif ($imagen !== "") {
+                // Compatibilidad: si solo enviaron imagen principal
                 $this->dao->insertarImagenPrincipal($idProducto, $imagen);
             }
 
@@ -161,19 +211,76 @@ if ($stockMinimo < 0) {
             "ultima_actualizacion" => date("Y-m-d H:i:s"),
         ]);
 
-        // 3) Imagen principal (si mandan una)
-        if ($imagen !== "") {
+        // 3) Imagenes (principal + adicionales)
+        $imagenesJson = trim($post["imagenes_json"] ?? "");
+        if ($imagenesJson !== "") {
+            $arr = json_decode($imagenesJson, true);
+            if (is_array($arr) && count($arr) > 0) {
+                $this->dao->borrarImagenesProducto($idProducto);
+                $tienePrincipal = false;
+                foreach ($arr as $it) {
+                    if (!empty($it["principal"])) { $tienePrincipal = true; break; }
+                }
+                $orden = 0;
+                foreach ($arr as $idx => $it) {
+                    $url = trim($it["url"] ?? "");
+                    if ($url === "") continue;
+                    $esPrincipal = !empty($it["principal"]) || (!$tienePrincipal && $idx === 0);
+                    if ($esPrincipal) {
+                        $this->dao->insertarImagen($idProducto, $url, 1, 0);
+                    } else {
+                        $orden++;
+                        $this->dao->insertarImagen($idProducto, $url, 0, $orden);
+                    }
+                }
+            }
+        } elseif ($imagen !== "") {
+            // Compatibilidad: si solo mandan imagen principal
             $this->dao->resetImagenPrincipal($idProducto);
             $this->dao->insertarImagenPrincipal($idProducto, $imagen);
         }
 
-        // 4) Promos
-        if ($precioOferta !== null) {
-            $this->dao->crearPromocionParaProducto($idProducto, "Promo - " . $nombre, $precioOferta);
-        } else {
-            $this->dao->desactivarPromocionesDeProducto($idProducto);
-            $this->dao->borrarVinculosPromocionProducto($idProducto);
+        
+        
+// 4) Promos (CORRECTO Y FINAL)
+if ($precioOferta !== null) {
+
+    $promoExistente = $this->dao->obtenerPromocionPorProducto($idProducto);
+
+    if ($promoExistente) {
+        // UPDATE si ya existe promo
+        $this->dao->actualizarPromocionProducto(
+            (int)$promoExistente["id_promocion"],
+            "Promo - " . $nombre,
+            $precioOferta
+        );
+    } else {
+        // INSERT solo si NO existe
+        $this->dao->crearPromocionParaProducto(
+            $idProducto,
+            "Promo - " . $nombre,
+            $precioOferta
+        );
+    }
+
+} else {
+    // Si ya no hay descuento, desactivar promo
+    $this->dao->desactivarPromocionesDeProducto($idProducto);
+}
+
+
+        // 5) Colores (permitir varios) + opcional nuevo color
+        $idsColores = [];
+        if (isset($post["colores"])) {
+            $idsColores = is_array($post["colores"]) ? $post["colores"] : [$post["colores"]];
         }
+        $nuevoNombre = trim($post["nuevo_color_nombre"] ?? "");
+        $nuevoHex    = trim($post["nuevo_color_hex"] ?? "");
+        if ($nuevoNombre !== "") {
+            $idNuevo = $this->dao->crearColorSiNoExiste($nuevoNombre, $nuevoHex);
+            if ($idNuevo) $idsColores[] = $idNuevo;
+        }
+        $this->dao->reemplazarColoresDeProducto($idProducto, $idsColores);
 
         $this->pdo->commit();
     } catch (Exception $e) {

@@ -3,11 +3,19 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>MegaSantiago | Bazar</title>
+  <title>MegaSantiago | Productos de Arte</title>
 
   <!-- ✅ InfinityFree: rutas absolutas -->
   <link rel="stylesheet" href="/View/assets/css/estilos.css">
   <link rel="stylesheet" href="/View/assets/css/overrides.css">
+    <!-- Bootstrap CSS -->
+<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+
+<!-- Bootstrap Icons -->
+<link href="https://cdn.jsdelivr.net/npm/bootstrap-icons/font/bootstrap-icons.css" rel="stylesheet">
+
+<!-- CSS del footer -->
+<link rel="stylesheet" href="/View/assets/css/footer.css">
 </head>
 
 <body>
@@ -18,14 +26,14 @@
   <!-- ================== -->
 
   <!-- HERO -->
-  <section class="category-hero hero-bazar">
+  <section class="category-hero">
     <div class="category-hero-inner">
-      <h1>Bazar</h1>
-      <p>Decoración, regalos, organizadores y más.</p>
+      <h1>Productos de Arte</h1>
+      <p>Materiales para dibujo, pintura y manualidades creativas.</p>
     </div>
   </section>
 
-  <!-- LAYOUT CATÁLOGO -->
+  <!-- CONTENIDO -->
   <main class="category-page">
     <div class="category-layout">
 
@@ -33,46 +41,40 @@
       <aside class="category-sidebar">
         <h3>Categorías</h3>
         <ul class="category-list">
-          <li class="active"><a href="bazar.html">Bazar</a></li>
+          <li><a href="bazar.html">Bazar</a></li>
           <li><a href="papeleria.html">Papelería</a></li>
-          <li><a href="productos-arte.html">Productos de arte</a></li>
+          <li class="active"><a href="productos-arte.html">Productos de arte</a></li>
           <li><a href="suministros-oficina.html">Suministros de oficina</a></li>
           <li><a href="utiles-escolares.html">Útiles escolares</a></li>
         </ul>
 
         <div class="sidebar-block">
           <h4>Filtrar por</h4>
-          <label class="sidebar-label">Sección</label>
-          <select class="sidebar-select sidebar-select-seccion">
-            <option value="todos">Todas</option>
-            <option value="globos">Globos</option>
-            <option value="decoracion">Decoración</option>
-            <option value="organizadores">Organizadores</option>
-            <option value="velas">Velas</option>
-            <option value="regalos">Regalos</option>
-            <option value="detalles">Detalles</option>
+          <label class="sidebar-label">Tipo</label>
+          <select class="sidebar-select sidebar-select-tipo">
+            <option value="todos">Cualquier tipo</option>
+            <option value="acrilica">Pintura acrílica</option>
+            <option value="espuma">Espuma flex</option>
+            <option value="marcadores">Marcadores</option>
           </select>
-          <small class="text-muted" style="display:block;margin-top:6px;">
-            Tip: si llegas desde el menú (ej. <b>BAZAR ▾</b>), se filtra por el # de la URL.
-          </small>
         </div>
 
         <div class="sidebar-block">
           <h4>Filtrar por precio</h4>
-          <input type="range" min="0" max="50" value="25" class="sidebar-range">
-          <div class="sidebar-range-info">Precio máx: $25</div>
+          <input type="range" min="0" max="100" value="40" class="sidebar-range">
+          <div class="sidebar-range-info">Precio máx: $40</div>
           <button class="btn-sidebar">FILTRAR</button>
         </div>
       </aside>
 
-      <!-- CONTENIDO -->
+      <!-- PRODUCTOS -->
       <section class="category-main">
         <div class="category-main-header">
-          <p id="textoResultadosBazar">Mostrando 0 resultados</p>
+          <p id="textoResultadosArte">Mostrando 0 resultados</p>
 
           <div class="category-sort">
-            <label for="ordenBazar">Ordenar por:</label>
-            <select id="ordenBazar" class="sidebar-select">
+            <label for="ordenArte">Ordenar por:</label>
+            <select id="ordenArte" class="sidebar-select">
               <option value="default">Predeterminado</option>
               <option value="precio-asc">Precio: menor a mayor</option>
               <option value="precio-desc">Precio: mayor a menor</option>
@@ -80,7 +82,7 @@
           </div>
         </div>
 
-        <div id="gridBazar" class="product-grid"></div>
+        <div id="gridArte" class="product-grid"></div>
       </section>
 
     </div>
@@ -91,16 +93,18 @@
   <div id="scripts"></div>
   <!-- ================== -->
 
-  <!-- ✅ 1) Layout loader -->
+  <!-- ✅ Layout loader -->
   <script src="/View/assets/js/layout-loader.js"></script>
 
-  <!-- ✅ 2) Lógica de esta página -->
-  <script src="/View/assets/js/pages/bazar.js"></script>
+  <!-- ✅ Lógica de esta página -->
+  <script src="/View/assets/js/pages/productos-arte.js"></script>
 
-  <!-- ✅ 3) Ejecutar luego de cargar header/nav/footer -->
+  <!-- ✅ Ejecutar después de loadLayout -->
   <script>
     loadLayout().then(() => {
-      window.initBazarPage?.();
+      window.initArtePage?.();
+
+      // (Opcional) sesión usuario
       const s = document.createElement("script");
       s.src = "/View/assets/js/sesion-usuario.js";
       document.body.appendChild(s);

@@ -1,0 +1,11 @@
+footer {
+    background-color: #0069b4 !important;
+}
+
+footer h6 {
+    margin-bottom: 15px;
+}
+
+footer a:hover {
+    text-decoration: underline;
+}

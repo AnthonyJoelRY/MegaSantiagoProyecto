@@ -102,10 +102,13 @@ class PedidoService
             // Guardamos detalles como Entities antes de persistir
             /** @var PedidoDetalle[] $detalles */
             $detalles = [];
+            /** @var array<int,string> $detallesColores */
+            $detallesColores = [];
 
             foreach ($carrito as $item) {
                 $idProducto = (int)($item["id"] ?? $item["id_producto"] ?? 0);
                 $cantidad   = (int)($item["cantidad"] ?? $item["qty"] ?? 0);
+                $color      = (string)($item["color"] ?? "");
 
                 if ($idProducto <= 0 || $cantidad <= 0) continue;
 
@@ -122,10 +125,13 @@ class PedidoService
                 $d = new PedidoDetalle();
                 $d->id_pedido = 0; // se asigna después de insertar
                 $d->id_producto = $idProducto;
+                // Color seleccionado (opcional). Se persiste si la BD tiene la columna.
+                $d->color = (trim($color) !== '') ? $color : null;
                 $d->cantidad = $cantidad;
                 $d->precio_unit = $precioUnit;
                 $d->subtotal = $subtotal;
                 $detalles[] = $d;
+                $detallesColores[] = $color;
             }
 
             if ($totalProductos <= 0 || empty($detalles)) {
@@ -233,8 +239,9 @@ class PedidoService
                 $idSucursalStock = $pedido->id_sucursal_origen;
             }
             if ($idSucursalStock) {
-                foreach ($detalles as $d) {
-                    $this->inventarioDAO->reducirStock((int)$idSucursalStock, (int)$d->id_producto, (int)$d->cantidad);
+                foreach ($detalles as $idx => $d) {
+                    $color = $detallesColores[$idx] ?? null;
+                    $this->inventarioDAO->reducirStock((int)$idSucursalStock, (int)$d->id_producto, (int)$d->cantidad, $color);
                 }
             }
 

@@ -17,6 +17,15 @@ $__rol = isset($_SESSION['rol']) ? (int)$_SESSION['rol'] : 0;
                     </a>
                 </li>
             <?php endif; ?>
+            
+<li class="nav-item">
+    <a class="nav-link <?= $seccionActiva === 'promociones' ? 'active' : '' ?>"
+       href="<?= PROJECT_BASE ?>/panel/promociones">
+        📢 Promociones
+    </a>
+</li>
+
+
 
             <!-- Menú limitado (Empleado) y completo (Admin) -->
             <?php if ($__rol === 1 || $__rol === 4): ?>

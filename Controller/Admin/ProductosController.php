@@ -40,6 +40,10 @@ class ProductosController {
         $service = new AdminProductoService($pdo);
         $categorias = $service->categorias();
 
+        // ✅ Colores disponibles (en "nuevo" NO hay producto todavía)
+        $colores = $service->colores();
+        $coloresProducto = [];
+
         // Imágenes disponibles (si usas locales, no se usan actualmente)
         $carpeta = __DIR__ . "/../../Model/imagenes/";
         $imagenes = [];
@@ -74,6 +78,8 @@ class ProductosController {
         }
 
         $categorias = $service->categorias();
+        $colores = $service->colores();
+        $coloresProducto = $service->coloresDelProducto($id);
 
         $seccionActiva = "productos";
         require __DIR__ . "/../../View/admin/productos/editar.view.php";

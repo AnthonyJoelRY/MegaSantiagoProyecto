@@ -9,8 +9,55 @@ class InventarioSucursalDAO
 {
     public function __construct(private PDO $pdo) {}
 
-    public function obtenerStock(int $idSucursal, int $idProducto): int
+    /** Cache simple de colores nombre->id_color para evitar muchas consultas */
+    private array $colorIdCache = [];
+
+    private function resolverIdColor(?string $nombreColor): ?int
     {
+        $nombreColor = trim((string)$nombreColor);
+        if ($nombreColor === '') return null;
+
+        $key = mb_strtolower($nombreColor);
+        if (array_key_exists($key, $this->colorIdCache)) {
+            $v = $this->colorIdCache[$key];
+            return $v ? (int)$v : null;
+        }
+
+        try {
+            $stmt = $this->pdo->prepare("SELECT id_color FROM colores WHERE activo = 1 AND LOWER(nombre) = LOWER(:n) LIMIT 1");
+            $stmt->execute(["n" => $nombreColor]);
+            $row = $stmt->fetch(PDO::FETCH_ASSOC);
+            $id = $row ? (int)($row['id_color'] ?? 0) : 0;
+            $this->colorIdCache[$key] = $id > 0 ? $id : 0;
+            return $id > 0 ? $id : null;
+        } catch (Throwable $e) {
+            $this->colorIdCache[$key] = 0;
+            return null;
+        }
+    }
+
+    /**
+     * Obtiene stock.
+     * - Si viene $color (string) intenta inventario_sucursal_color.
+     * - Si NO hay fila por color o la tabla no existe => fallback a inventario_sucursal / inventario.
+     */
+    public function obtenerStock(int $idSucursal, int $idProducto, ?string $color = null): int
+    {
+        // 0) intento por sucursal+color (si existe)
+        $idColor = $this->resolverIdColor($color);
+        if ($idColor) {
+            try {
+                $stmt0 = $this->pdo->prepare(
+                    "SELECT stock FROM inventario_sucursal_color WHERE id_sucursal = :s AND id_producto = :p AND id_color = :c LIMIT 1"
+                );
+                $stmt0->execute(["s" => $idSucursal, "p" => $idProducto, "c" => $idColor]);
+                $row0 = $stmt0->fetch(PDO::FETCH_ASSOC);
+                if ($row0 && isset($row0["stock"])) return (int)$row0["stock"];
+            } catch (Throwable $e) {
+                // si tabla no existe o no aplica, seguimos con fallback
+            }
+        }
+
         // 1) intento por sucursal
         $stmt = $this->pdo->prepare("SELECT stock_actual FROM inventario_sucursal WHERE id_sucursal = :s AND id_producto = :p LIMIT 1");
         try {
@@ -28,9 +75,31 @@ class InventarioSucursalDAO
         return (int)($row2["stock_actual"] ?? 0);
     }
 
-    public function reducirStock(int $idSucursal, int $idProducto, int $cantidad): void
+    /**
+     * Reduce stock.
+     * - Si viene $color intenta inventario_sucursal_color.
+     * - Si NO hay fila por color o la tabla no existe => fallback a inventario_sucursal / inventario.
+     */
+    public function reducirStock(int $idSucursal, int $idProducto, int $cantidad, ?string $color = null): void
     {
         if ($cantidad <= 0) return;
+
+        // 0) intento por sucursal+color (si existe)
+        $idColor = $this->resolverIdColor($color);
+        if ($idColor) {
+            try {
+                $stmt0 = $this->pdo->prepare(
+                    "UPDATE inventario_sucursal_color
+                     SET stock = stock - :c1
+                     WHERE id_sucursal = :s AND id_producto = :p AND id_color = :c AND stock >= :c2"
+                );
+                $stmt0->execute(["c1" => $cantidad, "c2" => $cantidad, "s" => $idSucursal, "p" => $idProducto, "c" => $idColor]);
+                if ($stmt0->rowCount() > 0) return; // ok
+                // si no había fila/stock insuficiente, caemos al fallback global para no romper flujo existente.
+            } catch (Throwable $e) {
+                // tabla no existe o error: fallback
+            }
+        }
 
         // Si existe inventario_sucursal, usamos esa tabla
         try {
@@ -78,7 +147,8 @@ class InventarioSucursalDAO
             $cant = (int)($p["cantidad"] ?? 0);
             if ($id <= 0 || $cant <= 0) continue;
 
-            $stock = $this->obtenerStock($idSucursal, $id);
+            $color = (string)($p["color"] ?? "");
+            $stock = $this->obtenerStock($idSucursal, $id, $color);
             if ($stock < $cant) {
                 $faltantes[] = [
                     "id_producto" => $id,

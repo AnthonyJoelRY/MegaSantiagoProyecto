@@ -3,11 +3,19 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>MegaSantiago | Suministros de oficina</title>
+  <title>MegaSantiago | Papelería</title>
 
   <!-- ✅ InfinityFree: rutas absolutas -->
   <link rel="stylesheet" href="/View/assets/css/estilos.css">
   <link rel="stylesheet" href="/View/assets/css/overrides.css">
+    <!-- Bootstrap CSS -->
+<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+
+<!-- Bootstrap Icons -->
+<link href="https://cdn.jsdelivr.net/npm/bootstrap-icons/font/bootstrap-icons.css" rel="stylesheet">
+
+<!-- CSS del footer -->
+<link rel="stylesheet" href="/View/assets/css/footer.css">
 </head>
 
 <body>
@@ -18,14 +26,14 @@
   <!-- ================== -->
 
   <!-- HERO -->
-  <section class="category-hero">
+  <section class="category-hero hero-papeleria">
     <div class="category-hero-inner">
-      <h1>Suministros de oficina</h1>
-      <p>Todo para tu escritorio, archivo y área administrativa.</p>
+      <h1>Papelería</h1>
+      <p>Cartulinas, papeles especiales y todo lo que necesitas para tus proyectos.</p>
     </div>
   </section>
 
-  <!-- CONTENIDO -->
+  <!-- LAYOUT CATÁLOGO -->
   <main class="category-page">
     <div class="category-layout">
 
@@ -34,9 +42,9 @@
         <h3>Categorías</h3>
         <ul class="category-list">
           <li><a href="bazar.html">Bazar</a></li>
-          <li><a href="papeleria.html">Papelería</a></li>
+          <li class="active"><a href="papeleria.html">Papelería</a></li>
           <li><a href="productos-arte.html">Productos de arte</a></li>
-          <li class="active"><a href="suministros-oficina.html">Suministros de oficina</a></li>
+          <li><a href="suministros-oficina.html">Suministros de oficina</a></li>
           <li><a href="utiles-escolares.html">Útiles escolares</a></li>
         </ul>
 
@@ -45,28 +53,28 @@
           <label class="sidebar-label">Tipo</label>
           <select class="sidebar-select sidebar-select-tipo">
             <option value="todos">Cualquier tipo</option>
-            <option value="archivadores">Archivadores</option>
-            <option value="escritura">Escritura</option>
-            <option value="organizacion">Organización</option>
+            <option value="cartulina">Cartulina</option>
+            <option value="papel">Papel bond</option>
+            <option value="corrugado">Cartón corrugado</option>
           </select>
         </div>
 
         <div class="sidebar-block">
           <h4>Filtrar por precio</h4>
-          <input type="range" min="0" max="150" value="60" class="sidebar-range">
-          <div class="sidebar-range-info">Precio máx: $60</div>
+          <input type="range" min="0" max="50" value="25" class="sidebar-range">
+          <div class="sidebar-range-info">Precio máx: $25</div>
           <button class="btn-sidebar">FILTRAR</button>
         </div>
       </aside>
 
-      <!-- PRODUCTOS -->
+      <!-- CONTENIDO -->
       <section class="category-main">
         <div class="category-main-header">
-          <p id="textoResultadosOficina">Mostrando 0 resultados</p>
+          <p id="textoResultadosPapeleria">Mostrando 0 resultados</p>
 
           <div class="category-sort">
-            <label for="ordenOficina">Ordenar por:</label>
-            <select id="ordenOficina" class="sidebar-select">
+            <label for="ordenPapeleria">Ordenar por:</label>
+            <select id="ordenPapeleria" class="sidebar-select">
               <option value="default">Predeterminado</option>
               <option value="precio-asc">Precio: menor a mayor</option>
               <option value="precio-desc">Precio: mayor a menor</option>
@@ -74,7 +82,7 @@
           </div>
         </div>
 
-        <div id="gridOficina" class="product-grid"></div>
+        <div id="gridPapeleria" class="product-grid"></div>
       </section>
 
     </div>
@@ -85,18 +93,18 @@
   <div id="scripts"></div>
   <!-- ================== -->
 
-  <!-- ✅ Layout loader -->
+  <!-- ✅ 1) Layout loader -->
   <script src="/View/assets/js/layout-loader.js"></script>
 
-  <!-- ✅ Lógica de esta página -->
-  <script src="/View/assets/js/pages/suministros-oficina.js"></script>
+  <!-- ✅ 2) Lógica de esta página -->
+  <script src="/View/assets/js/pages/papeleria.js"></script>
 
-  <!-- ✅ Ejecutar después de loadLayout -->
+  <!-- ✅ 3) Ejecutar luego de cargar header/nav/footer -->
   <script>
     loadLayout().then(() => {
-      window.initOficinaPage?.();
+      window.initPapeleriaPage?.();
 
-      // (Opcional) sesión usuario
+      // (Opcional) sesión si la usas
       const s = document.createElement("script");
       s.src = "/View/assets/js/sesion-usuario.js";
       document.body.appendChild(s);

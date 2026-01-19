@@ -6,11 +6,13 @@ class Promocion implements JsonSerializable
     public int $id_promocion = 0;
     public string $nombre = "";
     public string $descripcion = "";
+    public ?string $imagen_banner = null; 
     public string $fecha_inicio = "";
-    public string $fecha_fin = "";
+    public ?string $fecha_fin = null;
     public string $tipo_descuento = "";
     public float $valor_descuento = 0.0;
     public int $activo = 0;
+
 
     /** @var array<string,mixed> */
     private array $raw = [];
@@ -22,6 +24,7 @@ class Promocion implements JsonSerializable
         $e->id_promocion = (int)($row["id_promocion"] ?? 0);
         $e->nombre = (string)($row["nombre"] ?? "");
         $e->descripcion = (string)($row["descripcion"] ?? "");
+        $e->imagen_banner = $row["imagen_banner"] ?? null;
         $e->fecha_inicio = (string)($row["fecha_inicio"] ?? "");
         $e->fecha_fin = (string)($row["fecha_fin"] ?? "");
         $e->tipo_descuento = (string)($row["tipo_descuento"] ?? "");
@@ -38,6 +41,7 @@ class Promocion implements JsonSerializable
             "id_promocion" => $this->id_promocion,
             "nombre" => $this->nombre,
             "descripcion" => $this->descripcion,
+            "imagen_banner" => $this->imagen_banner,
             "fecha_inicio" => $this->fecha_inicio,
             "fecha_fin" => $this->fecha_fin,
             "tipo_descuento" => $this->tipo_descuento,
