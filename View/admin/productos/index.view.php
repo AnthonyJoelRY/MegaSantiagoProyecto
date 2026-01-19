@@ -1,10 +1,5 @@
 <?php $seccionActiva = "productos"; ?>
 
-
-
-
-
-
 <!DOCTYPE html>
 <html lang="es">
 
@@ -15,28 +10,21 @@
 
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
     <style>
-        /* Estilos personalizados muy sencillos para la barra lateral y asegurar que el contenido se vea */
         .sidebar {
-            /* Asegura que el color de fondo de la barra lateral sea consistente */
             background-color: #212529 !important;
-            /* Usando bg-dark */
         }
 
         .nav-link.active {
-            /* Estilo para el enlace activo */
             background-color: rgba(255, 255, 255, 0.1);
             border-left: 4px solid var(--bs-info);
-            /* Línea de color para indicar activo */
         }
 
         .nav-link {
             padding-left: 1.5rem;
-            /* Pequeño ajuste para el padding de los enlaces */
         }
 
         .card-body h2 {
             font-size: 2.5rem;
-            /* Ajuste para las métricas clave */
         }
     </style>
 </head>
@@ -53,9 +41,7 @@
                 <div class="d-flex justify-content-between align-items-center mb-5 bg-white p-3 rounded-4 shadow-sm border-bottom border-primary border-3">
                     <h1 class="h2 text-primary fw-bold mb-0">Gestión de Productos</h1>
                     <small class="text-muted">Administra el catálogo de la tienda</small>
-
                 </div>
-
 
                 <div class="d-flex justify-content-between align-items-center mb-4 bg-white p-3 rounded-4 shadow-sm">
 
@@ -69,15 +55,10 @@
                         <button class="btn btn-outline-primary">🔍</button>
                     </form>
 
-
-
                     <a href="<?= PROJECT_BASE ?>/panel/productos/nuevo"
                         class="btn btn-primary fw-semibold">
                         + Agregar producto
                     </a>
-
-
-
                 </div>
 
                 <?php if (isset($_GET["ok"])): ?>
@@ -95,23 +76,20 @@
                         <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
                     </div>
                 <?php endif; ?>
-                
+
                 <?php if (isset($_GET["ok"])): ?>
-    <div class="alert alert-success alert-dismissible fade show" role="alert">
-        ✅ Producto creado correctamente.
-        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
-    </div>
-<?php endif; ?>
+                    <div class="alert alert-success alert-dismissible fade show" role="alert">
+                        ✅ Producto creado correctamente.
+                        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                    </div>
+                <?php endif; ?>
 
-<?php if (isset($_GET["edit"])): ?>
-    <div class="alert alert-success alert-dismissible fade show" role="alert">
-        ✏️ Cambios guardados correctamente.
-        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
-    </div>
-<?php endif; ?>
-
-
-
+                <?php if (isset($_GET["edit"])): ?>
+                    <div class="alert alert-success alert-dismissible fade show" role="alert">
+                        ✏️ Cambios guardados correctamente.
+                        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                    </div>
+                <?php endif; ?>
 
                 <div class="card rounded-4 shadow-sm border-0 bg-white">
                     <div class="card-body">
@@ -122,7 +100,6 @@
                                     <th>Imagen</th>
                                     <th>Nombre</th>
                                     <th>Precio</th>
-                                    <th>Stock</th>
                                     <th>Oferta</th>
                                     <th>Estado</th>
                                     <th class="text-center">Acciones</th>
@@ -132,7 +109,7 @@
                             <tbody>
                                 <?php if (count($productos) === 0): ?>
                                     <tr>
-                                        <td colspan="7" class="text-center text-muted py-4">
+                                        <td colspan="6" class="text-center text-muted py-4">
                                             No hay productos registrados aún
                                         </td>
                                     </tr>
@@ -143,45 +120,39 @@
                                                 <?php if (!empty($p["url_imagen"])): ?>
 
                                                     <?php
-$rutaImagen = $p["url_imagen"];
+                                                    $rutaImagen = trim((string)$p["url_imagen"]);
 
-// ✅ Si es URL externa (Firebase, Cloudinary, etc)
-if (preg_match('/^https?:\/\//', $rutaImagen)) {
-    // se usa tal cual
-} else {
-    // ✅ imagen local
-    $rutaImagen = PROJECT_BASE . "/Model/" . ltrim($rutaImagen, '/');
-}
-?>
+                                                    // ✅ Si es URL externa (Firebase, Cloudinary, etc) se usa tal cual.
+                                                    // ✅ Si es ruta local, la normalizamos a una ruta absoluta del proyecto para que funcione dentro de /panel/...
+                                                    if (!preg_match('/^https?:\/\//i', $rutaImagen)) {
+                                                        if ($rutaImagen !== "") {
+                                                            $rutaImagen = ($rutaImagen[0] === "/")
+                                                                ? (PROJECT_BASE . $rutaImagen)
+                                                                : (PROJECT_BASE . "/" . $rutaImagen);
+                                                        }
+                                                    }
+                                                    ?>
 
-<img src="<?= htmlspecialchars($rutaImagen) ?>" width="60" class="rounded">
-
+                                                    <img src="<?= htmlspecialchars($rutaImagen) ?>" width="60" class="rounded">
 
                                                 <?php else: ?>
                                                     <span class="text-muted">Sin imagen</span>
                                                 <?php endif; ?>
                                             </td>
 
-
                                             <td><?= htmlspecialchars($p["nombre"]) ?></td>
 
                                             <td>$<?= number_format($p["precio"], 2) ?></td>
 
-                                            <td><?= $p["stock"] ?></td>
-
-                                            
-<td>
-    <?php if (!empty($p["precio_oferta"])): ?>
-        <span class="badge bg-warning text-dark">
-            <?= (int)$p["precio_oferta"] ?>% OFF
-        </span>
-    <?php else: ?>
-        —
-    <?php endif; ?>
-</td>
-
-
-
+                                            <td>
+                                                <?php if (!empty($p["precio_oferta"])): ?>
+                                                    <span class="badge bg-warning text-dark">
+                                                        <?= (int)$p["precio_oferta"] ?>% OFF
+                                                    </span>
+                                                <?php else: ?>
+                                                    —
+                                                <?php endif; ?>
+                                            </td>
 
                                             <td>
                                                 <?php if ($p["activo"]): ?>
@@ -208,7 +179,6 @@ if (preg_match('/^https?:\/\//', $rutaImagen)) {
                                                         <?= $p["activo"] ? '🚫' : '✅' ?>
                                                     </button>
                                                 </form>
-
                                             </td>
                                         </tr>
                                     <?php endforeach; ?>
@@ -219,7 +189,6 @@ if (preg_match('/^https?:\/\//', $rutaImagen)) {
 
                     </div>
                 </div>
-
 
             </main>
 

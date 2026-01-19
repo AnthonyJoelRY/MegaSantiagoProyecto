@@ -54,6 +54,13 @@ $routes = [
     "productosSinStock" => function () use ($service) {
         api_responder($service->productosSinStock());
     },
+    
+    "productosMasVendidosPublicos" => function () use ($service) {
+    $limit = isset($_GET["limit"]) ? (int)$_GET["limit"] : 4;
+    if ($limit <= 0) $limit = 4;
+
+    api_responder($service->productosMasVendidosPublicos($limit));
+},
 
     "productosStockBajo" => function () use ($service) {
         api_responder($service->productosStockBajo());

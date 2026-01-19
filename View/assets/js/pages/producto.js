@@ -193,43 +193,146 @@
     document.getElementById("pPrecio").innerHTML =
       `${money(precioMostrado)} ${data.aplica_iva ? "<small>+ IVA</small>" : ""}`;
 
+    // ✅ Precio Empresa (rol=2): solo visual (el descuento real se aplica al generar el pedido)
+    try {
+      const u = JSON.parse(localStorage.getItem("usuarioMega") || "null");
+      const esEmpresa = u && Number(u.rol) === 2;
+      const elPE = document.getElementById("pPrecioEmpresa");
+      if (elPE && esEmpresa) {
+        const rate = 0.10; // 10% empresa
+        const precioEmpresa = Math.max(0, precioMostrado * (1 - rate));
+        elPE.style.display = "block";
+        elPE.innerHTML = `Empresa: ${money(precioEmpresa)} <span style="font-weight:600; opacity:.8;">(-${Math.round(rate * 100)}%)</span>`;
+      } else if (elPE) {
+        elPE.style.display = "none";
+        elPE.innerHTML = "";
+      }
+    } catch (e) {}
+
     document.getElementById("pDescCorta").textContent = data.descripcion_corta || "";
     document.getElementById("pDescLarga").innerHTML = (data.descripcion_larga || "").replace(/\n/g, "<br>");
 
-    // Galería
-    const imgs = Array.isArray(data.imagenes) && data.imagenes.length
-      ? data.imagenes
-      : [{ url_imagen: data.imagen }];
-
-    const principal = imgs.find((x) => Number(x.es_principal) === 1) || imgs[0];
-    document.getElementById("imgPrincipal").src = resolverImagen(principal?.url_imagen || principal);
-
+    // ============================
+    // Galería (principal + miniaturas)
+    // ============================
+    const imgPrincipal = document.getElementById("imgPrincipal");
     const thumbs = document.getElementById("thumbs");
-    thumbs.innerHTML = imgs
-      .filter((x) => x && (x.url_imagen || x))
-      .map((x, i) => {
-        const u = resolverImagen(x.url_imagen || x);
-        return `<button type="button" data-url="${u}" aria-label="Imagen ${i + 1}">
-                  <img src="${u}" alt="thumb">
-                </button>`;
-      })
-      .join("");
 
-    thumbs.querySelectorAll("button").forEach((b) => {
-      b.addEventListener("click", () => {
-        document.getElementById("imgPrincipal").src = b.dataset.url;
+    const normalizeUrl = (u) => {
+      const s = String(u || "").trim();
+      if (!s) return "";
+      if (s.startsWith("http://") || s.startsWith("https://")) return s;
+      return s.startsWith("/") ? s : `/${s}`;
+    };
+
+    // En tu API: data.imagenes es array de objetos {url_imagen, es_principal, orden}
+    let imgs = [];
+    if (Array.isArray(data.imagenes)) {
+      imgs = data.imagenes
+        .map((x) => normalizeUrl(x.url_imagen ?? x.imagen ?? x.url ?? x))
+        .filter(Boolean);
+    }
+
+    // Fallback por si algún endpoint devuelve "imagen"
+    if (!imgs.length && data.imagen) imgs = [normalizeUrl(data.imagen)];
+
+    if (imgPrincipal) {
+      imgPrincipal.src = imgs[0] || "https://via.placeholder.com/600x600?text=Sin+Imagen";
+      imgPrincipal.onerror = () => {
+        imgPrincipal.src = "https://via.placeholder.com/600x600?text=Sin+Imagen";
+      };
+    }
+
+    if (thumbs) {
+      thumbs.innerHTML = "";
+      imgs.forEach((url, idx) => {
+        const b = document.createElement("button");
+        b.type = "button";
+        b.innerHTML = `<img src="${url}" alt="Imagen ${idx + 1}" />`;
+        b.addEventListener("click", () => {
+          if (imgPrincipal) imgPrincipal.src = url;
+        });
+        thumbs.appendChild(b);
       });
-    });
+    }
 
-    // Colores
+      function ensureCarouselControls(total) {
+        const wrap = document.querySelector(".product-image-main");
+        if (!wrap) return;
+
+        // limpiar controles prev/next existentes
+        wrap.querySelectorAll(".carousel-prev,.carousel-next").forEach(el => el.remove());
+
+        if (total <= 1) return;
+
+        const prev = document.createElement("button");
+        prev.type = "button";
+        prev.className = "carousel-prev";
+        prev.innerHTML = "&#10094;";
+        prev.addEventListener("click", () => setIndex(currentIndex - 1));
+
+        const next = document.createElement("button");
+        next.type = "button";
+        next.className = "carousel-next";
+        next.innerHTML = "&#10095;";
+        next.addEventListener("click", () => setIndex(currentIndex + 1));
+
+        wrap.appendChild(prev);
+        wrap.appendChild(next);
+
+        // swipe en mobile
+        let x0 = null;
+        imgPrincipal.addEventListener("touchstart", (e) => {
+          x0 = (e.touches && e.touches[0]) ? e.touches[0].clientX : null;
+        }, { passive: true });
+        imgPrincipal.addEventListener("touchend", (e) => {
+          if (x0 === null) return;
+          const x1 = (e.changedTouches && e.changedTouches[0]) ? e.changedTouches[0].clientX : null;
+          if (x1 === null) return;
+          const dx = x1 - x0;
+          x0 = null;
+          if (Math.abs(dx) < 35) return;
+          if (dx > 0) setIndex(currentIndex - 1);
+          else setIndex(currentIndex + 1);
+        }, { passive: true });
+      }
+
+      function renderDots(total) {
+        let dotsWrap = document.getElementById("carouselDots");
+        if (!dotsWrap) {
+          dotsWrap = document.createElement("div");
+          dotsWrap.id = "carouselDots";
+          dotsWrap.className = "carousel-dots";
+          const gallery = document.querySelector(".product-gallery");
+          if (gallery) gallery.appendChild(dotsWrap);
+        }
+        dotsWrap.innerHTML = "";
+        if (total <= 1) return;
+        for (let i = 0; i < total; i++) {
+          const d = document.createElement("button");
+          d.type = "button";
+          d.className = "carousel-dot" + (i === currentIndex ? " active" : "");
+          d.addEventListener("click", () => setIndex(i));
+          dotsWrap.appendChild(d);
+        }
+      }
+
+
+    // Colores (1 producto puede tener varios; se elige 1 antes de agregar al carrito)
     const colores = Array.isArray(data.colores) ? data.colores : [];
     const rowColor = document.getElementById("rowColor");
-    if (colores.length && rowColor) {
+    const sel = document.getElementById("selColor");
+
+    if (colores.length && rowColor && sel) {
       rowColor.style.display = "flex";
-      const sel = document.getElementById("selColor");
-      sel.innerHTML = colores.map((c) => `<option value="${c}">${c}</option>`).join("");
+      // ✅ Placeholder para obligar a escoger
+      sel.innerHTML = [
+        '<option value="">Seleccione un color...</option>',
+        ...colores.map((c) => `<option value="${String(c).replace(/"/g, '&quot;')}">${c}</option>`)
+      ].join("");
     } else if (rowColor) {
       rowColor.style.display = "none";
+      if (sel) sel.innerHTML = "";
     }
 
     // Qty
@@ -242,9 +345,15 @@
       const qty = Math.max(1, Number(inp.value || 1));
 
       const colorSel =
-        (rowColor && rowColor.style.display !== "none")
-          ? document.getElementById("selColor").value
+        (rowColor && rowColor.style.display !== "none" && sel)
+          ? String(sel.value || "").trim()
           : "";
+
+      // ✅ Si hay colores disponibles, exigir selección
+      if (colores.length && !colorSel) {
+        setMsg("Selecciona un color antes de agregar al carrito.", false);
+        return;
+      }
 
       agregarAlCarrito({
         id: data.id,

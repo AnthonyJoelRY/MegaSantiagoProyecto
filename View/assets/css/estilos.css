@@ -1,4 +1,9 @@
 
+html, body {
+  max-width: 100%;
+  overflow-x: hidden;
+}
+
 /* RESET SIMPLE */
 * {
     margin: 0;
@@ -29,6 +34,8 @@ body {
     padding: 10px 40px;
     background-color: #ffffff;
     box-shadow: 0 2px 4px rgba(0,0,0,.05);
+      gap: 16px;
+  width: 100%;
 }
 
 .logo-mega {
@@ -404,61 +411,6 @@ body {
     color: #555;
 }
 
-/* RESPONSIVE BÁSICO */
-@media (max-width: 900px) {
-    .banner-principal {
-        padding: 20px;
-        min-height: 220px;
-    }
-
-    .seccion {
-        padding: 20px;
-    }
-
-    .grid-categorias {
-        grid-template-columns: repeat(2, minmax(0, 1fr));
-    }
-
-    .carrusel-productos {
-        grid-template-columns: repeat(2, minmax(0, 1fr));
-    }
-
-    .main-header {
-        flex-wrap: wrap;
-        gap: 10px;
-        padding: 10px 16px;
-    }
-
-    .header-center {
-        width: 100%;
-    }
-
-    .search-box {
-        width: 100%;
-    }
-
-    /* Nav responsive básico */
-    .menu {
-        flex-wrap: wrap;
-        gap: 16px;
-        padding: 8px 10px;
-    }
-
-    .mega-menu,
-    .submenu {
-        position: static;
-        box-shadow: none;
-        width: 100%;
-        padding: 10px 15px;
-    }
-
-    .columnas-3,
-    .columnas-2 {
-        width: 100%;
-        grid-template-columns: 1fr;
-        row-gap: 10px;
-    }
-}
 
 /* =======================
    PÁGINA LOGIN / REGISTRO
@@ -1153,3 +1105,400 @@ body {
     border-radius: 12px;
     box-shadow: 0 2px 8px rgba(0,0,0,0.1);
 }
+
+#promoCarousel {
+  max-height: 420px;
+  overflow: hidden;
+}
+
+#promoCarousel img {
+  width: 100%;
+  height: 420px;
+  object-fit: cover;
+}
+
+
+  /* Ajustes RESPONSIVE para el carrusel de OFERTAS */
+@media (max-width: 576px) {
+
+  /* Altura menor del carrusel */
+  .ofertas-carrusel-wrapper {
+    height: 340px;
+  }
+
+  /* Card central más pequeña */
+  .ofertas-carrusel > div.center {
+    transform: translate(-50%, -50%) scale(1);
+  }
+
+  /* Ocultamos left y right (no se ve bonito en móvil) */
+  .ofertas-carrusel > div.left,
+  .ofertas-carrusel > div.right {
+    opacity: 0;
+    pointer-events: none;
+  }
+
+  /* Flechas más pequeñas */
+  .ofertas-carrusel-frame .promo-arrow {
+    width: 36px;
+    height: 36px;
+  }
+
+  /* Flechas más cerca del centro */
+  .ofertas-carrusel-frame .promo-arrow.prev {
+    left: 5px;
+  }
+
+  .ofertas-carrusel-frame .promo-arrow.next {
+    right: 5px;
+  }
+
+  /* Dots más juntos */
+  .promo-dots {
+    margin-top: 12px;
+  }
+}
+
+
+
+  /* Ajustar CATEGORÍAS horizontales */
+@media (max-width: 768px) {
+
+  .categorias-horizontal {
+    display: flex;
+    gap: 12px;
+    overflow-x: auto;
+    padding-bottom: 8px;
+  }
+
+  .categorias-horizontal a {
+    flex: 0 0 auto;
+    width: 140px;
+  }
+
+  .categorias-horizontal img {
+    width: 100%;
+    height: auto;
+  }
+
+  /* Scroll bonito */
+  .categorias-horizontal::-webkit-scrollbar {
+    height: 6px;
+  }
+
+  .categorias-horizontal::-webkit-scrollbar-thumb {
+    background: #ccc;
+    border-radius: 4px;
+  }
+}
+
+
+
+
+@media (max-width: 768px) {
+
+  /* Header en columna */
+  .main-header {
+    flex-direction: column;
+    align-items: stretch;
+    padding: 8px 12px;
+    gap: 8px;
+  }
+
+  /* Logo centrado */
+  .header-left {
+    display: flex;
+    justify-content: center;
+    margin: 0;
+  }
+
+  .logo-mega {
+    max-width: 140px;
+    height: auto;
+  }
+
+  /* Contenedor del buscador */
+  .header-center {
+    width: 100%;
+    display: flex;
+    justify-content: stretch;
+    margin: 0; /* 🔴 clave */
+  }
+
+  /* Caja buscador */
+  .search-box {
+    position: relative;
+    width: 100%;
+    max-width: 100%;
+    margin: 0;
+    overflow: visible;
+  }
+
+  /* Input SIEMPRE visible */
+  .search-box input {
+    width: 100%;
+    min-width: 0;
+    padding: 12px 56px 12px 18px;
+  }
+
+  /* Botón lupa */
+  .btn-search {
+    position: absolute;
+    top: 50%;
+    right: 6px;
+    transform: translateY(-50%);
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    padding: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  /* Usuario / carrito centrado */
+  .header-right {
+    display: flex;
+    justify-content: center;
+    margin: 0;
+  }
+}
+
+
+@media (max-width: 768px) {
+
+  body {
+    overflow-x: hidden;
+    overflow-y: visible;
+  }
+
+}
+
+
+.menu-item > a {
+  cursor: pointer;
+}
+
+
+/* ======================
+   BOTÓN HAMBURGUESA
+   ====================== */
+.btn-menu-mobile {
+  display: none;
+  font-size: 26px;
+  background: none;
+  border: none;
+  cursor: pointer;
+  color: #003b63;
+}
+
+/* =========================
+   MENU MOVIL NORMAL (SOLO CELULAR)
+   ========================= */
+@media (max-width: 768px) {
+
+  .menu-mobile {
+    background: #ffffff;
+    width: 100%;
+    padding: 0;
+  }
+
+  .menu-mobile .menu {
+    display: flex;
+    flex-direction: column;
+  }
+
+  .menu-mobile .menu-item {
+    border-bottom: 1px solid #eee;
+  }
+
+  /* Botón principal */
+  .menu-mobile .menu-item > a {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 14px 16px;
+    font-size: 16px;
+    font-weight: 600;
+    color: #222;
+    text-decoration: none;
+  }
+
+  /* Flecha */
+  .menu-mobile .menu-item > a::after {
+    content: "▾";
+    font-size: 14px;
+    transition: transform 0.3s ease;
+  }
+
+  /* Flecha rotada */
+  .menu-mobile .menu-item.open > a::after {
+    transform: rotate(180deg);
+  }
+
+  /* Submenú cerrado */
+  .menu-mobile .submenu,
+  .menu-mobile .mega-menu {
+    display: none;
+    flex-direction: column;
+    background: #f9f9f9;
+  }
+
+  /* Submenú abierto */
+  .menu-mobile .menu-item.open > .submenu,
+  .menu-mobile .menu-item.open > .mega-menu {
+    display: flex;
+  }
+
+  /* Links del submenú */
+  .menu-mobile .submenu a,
+  .menu-mobile .mega-menu a {
+    padding: 12px 28px;
+    font-size: 14px;
+    color: #444;
+    text-decoration: none;
+  }
+
+  .menu-mobile .submenu a:hover,
+  .menu-mobile .mega-menu a:hover {
+    background: #eaeaea;
+  }
+}
+
+
+/* =========================
+   OVERLAY MENU MOVIL
+   ========================= */
+.menu-mobile-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0,0,0,.4);
+  display: none;
+  z-index: 2000;
+}
+
+/* Cuando está abierto */
+.menu-mobile-overlay.open {
+  display: block;
+}
+
+/* Panel del menú */
+.menu-mobile {
+  background: #fff;
+  width: 85%;
+  max-width: 320px;
+  height: 100%;
+  overflow-y: auto;
+  padding-top: 10px;
+}
+
+
+/* =========================
+   MOSTRAR HAMBURGUESA SOLO EN MÓVIL
+   ========================= */
+@media (max-width: 768px) {
+
+  .btn-menu-mobile {
+    display: block;
+  }
+
+  /* Ocultar nav principal amarillo en móvil */
+  .nav-principal {
+    display: none;
+  }
+}
+
+/* =========================
+   NAV DENTRO DEL HAMBURGUESA (FIX REAL)
+   ========================= */
+@media (max-width: 768px) {
+
+  /* Resetear estilos del nav desktop SOLO dentro del menú móvil */
+  .menu-mobile .nav-principal {
+    display: block;
+    background: #fff;
+  }
+
+  .menu-mobile .menu {
+    display: flex;
+    flex-direction: column;
+    overflow: visible;
+    white-space: normal;
+    gap: 0;
+    padding: 0;
+  }
+
+  .menu-mobile .menu-item {
+    flex-shrink: 1;
+    width: 100%;
+  }
+}
+
+
+
+
+@media (max-width: 768px) {
+
+  .menu-mobile .menu-item:not(.has-sub):not(.has-mega) > a::after {
+    content: "";
+  }
+}
+
+
+/* =========================
+   RESPONSIVE LOGIN / REGISTRO
+   SOLO MOVIL – NO AFECTA PC
+   ========================= */
+@media (max-width: 768px) {
+
+  .auth-page {
+    padding: 20px 12px;
+  }
+
+  .auth-container {
+    display: flex;
+    flex-direction: column;   /* 🔑 Apila */
+    gap: 24px;
+    max-width: 100%;
+  }
+
+  .auth-card {
+    width: 100%;
+    margin: 0;
+    padding: 20px 18px;
+    box-sizing: border-box;
+  }
+
+  .auth-card h2 {
+    text-align: center;
+  }
+
+  .btn-auth-primary,
+  .btn-auth-secondary {
+    width: 100%;
+  }
+
+  .auth-link {
+    display: block;
+    text-align: center;
+    margin-top: 10px;
+  }
+
+  .auth-password-wrapper {
+    display: flex;
+    align-items: center;
+  }
+
+  .auth-password-wrapper input {
+    flex: 1;
+  }
+
+  .btn-eye {
+    margin-left: 6px;
+  }
+}
+
+

@@ -7,6 +7,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
 
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" rel="stylesheet">
     <style>
         .sidebar {
             background-color: #212529 !important;
@@ -105,9 +106,61 @@
                     </div>
 
                 </div>
+<!-- =========================
+     SINCRONIZACIÓN / IMPORT
+========================= -->
+<h4 class="mb-4 text-dark fw-bold border-bottom pb-2">Sincronización</h4>
 
+<div class="row g-4 mb-5">
+  <div class="col-12">
+    <div class="card shadow rounded-4 border-0 bg-white">
+      <div class="card-body">
+
+        <div class="d-flex flex-wrap align-items-center justify-content-between gap-2 mb-3">
+          <div>
+            <h5 class="fw-bold mb-1 text-primary">
+              <i class="bi bi-cloud-arrow-down"></i> Importar productos desde BD externa
+            </h5>
+            <small class="text-muted">
+              Ejecuta importación incremental (si no hay cambios, fetched/applied = 0).
+            </small>
+          </div>
+
+          <div class="d-flex gap-2">
+            <button id="btnSyncImport" type="button" class="btn btn-primary">
+              <i class="bi bi-play-fill"></i> Ejecutar import
+            </button>
+            <button id="btnSyncClear" type="button" class="btn btn-outline-secondary">
+              <i class="bi bi-trash3"></i> Limpiar
+            </button>
+          </div>
+        </div>
+
+        <div class="d-flex flex-wrap align-items-center justify-content-between gap-2 mb-2">
+          <span id="syncEstado" class="badge bg-secondary px-3 py-2">
+            <i class="bi bi-info-circle"></i> Listo
+          </span>
+
+          <small class="text-muted text-break">
+            Endpoint:
+            <span id="syncEndpointText"></span>
+          </small>
+        </div>
+
+        <pre id="syncResultado"
+             class="p-3 rounded-3"
+             style="background:#0b1020;color:#e9eefc;white-space:pre-wrap;word-wrap:break-word;min-height:120px;margin:0;">
+(aquí aparecerá el JSON)
+        </pre>
+
+      </div>
+    </div>
+  </div>
+</div>
+<!-- ========================= -->
                 <h4 class="mb-4 text-dark fw-bold border-bottom pb-2">Usuarios</h4>
                 <div class="row g-4 mb-5">
+
 
                     <div class="col-md-6">
                         <div class="card shadow rounded-4 border-0 h-100 bg-white">
@@ -156,6 +209,84 @@
 
         </div>
     </div>
+
+    <script>
+      // UI de sincronización (panel admin)
+      // ✅ MVC: la vista SOLO llama a un controlador interno (/Controller/AdminSyncController.php)
+      // y NO expone tokens ni lógica de negocio.
+
+      function setSyncBadge(type, text, icon) {
+        const el = document.getElementById("syncEstado");
+        if (!el) return;
+
+        el.className = "badge px-3 py-2";
+        if (type === "ok") el.classList.add("bg-success");
+        else if (type === "err") el.classList.add("bg-danger");
+        else if (type === "run") el.classList.add("bg-primary");
+        else el.classList.add("bg-secondary");
+
+        el.innerHTML = `<i class="bi ${icon}"></i> ${text}`;
+      }
+
+      function buildAdminSyncUrl() {
+        // Endpoint interno: valida sesión admin y ejecuta SyncManager
+        return `/Controller/AdminSyncController.php?accion=import&entidad=productos`;
+      }
+
+      async function ejecutarImport() {
+        const btn = document.getElementById("btnSyncImport");
+        const out = document.getElementById("syncResultado");
+        const epTxt = document.getElementById("syncEndpointText");
+
+        const url = buildAdminSyncUrl();
+        if (epTxt) epTxt.textContent = url;
+
+        if (btn) {
+          btn.disabled = true;
+          btn.innerHTML = `<span class="spinner-border spinner-border-sm me-2"></span> Ejecutando...`;
+        }
+        setSyncBadge("run", "Ejecutando import...", "bi-hourglass-split");
+        if (out) out.textContent = "";
+
+        try {
+          const r = await fetch(url, { method: "GET", credentials: "same-origin" });
+          const json = await r.json();
+
+          if (out) out.textContent = JSON.stringify(json, null, 2);
+
+          if (json.ok) {
+            const fetched = json?.result?.import?.fetched ?? 0;
+            const applied = json?.result?.import?.applied ?? 0;
+            setSyncBadge("ok", `OK (fetched ${fetched}, applied ${applied})`, "bi-check-circle");
+          } else {
+            setSyncBadge("err", "Error en import", "bi-x-circle");
+          }
+
+        } catch (err) {
+          setSyncBadge("err", "Error de conexión", "bi-wifi-off");
+          if (out) out.textContent = String(err);
+        } finally {
+          if (btn) {
+            btn.disabled = false;
+            btn.innerHTML = `<i class="bi bi-play-fill"></i> Ejecutar import`;
+          }
+        }
+      }
+
+      function limpiarSalida() {
+        const out = document.getElementById("syncResultado");
+        if (out) out.textContent = "(aquí aparecerá el JSON)";
+        setSyncBadge("idle", "Listo", "bi-info-circle");
+      }
+
+      document.addEventListener("DOMContentLoaded", () => {
+        const epTxt = document.getElementById("syncEndpointText");
+        if (epTxt) epTxt.textContent = buildAdminSyncUrl();
+
+        document.getElementById("btnSyncImport")?.addEventListener("click", ejecutarImport);
+        document.getElementById("btnSyncClear")?.addEventListener("click", limpiarSalida);
+      });
+    </script>
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
 

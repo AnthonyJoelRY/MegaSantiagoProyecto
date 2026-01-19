@@ -20,20 +20,24 @@ class PasswordResetDAO {
     }
 
     public function cleanupExpired(): void {
-        $stmt = $this->pdo->prepare("DELETE FROM password_resets WHERE expires_at < NOW()");
-        $stmt->execute();
+        // No dependemos de NOW() del servidor MySQL (puede estar en UTC/SYSTEM).
+        // Comparamos contra el "now" calculado en PHP para evitar desfases.
+        $now = date("Y-m-d H:i:s");
+        $stmt = $this->pdo->prepare("DELETE FROM password_resets WHERE expires_at < ?");
+        $stmt->execute([$now]);
     }
 
     public function findValidByToken(string $token): ?array {
+        $now = date("Y-m-d H:i:s");
         $stmt = $this->pdo->prepare("
             SELECT id, email, token, expires_at
             FROM password_resets
             WHERE token = ?
-              AND expires_at >= NOW()
+              AND expires_at >= ?
             ORDER BY id DESC
             LIMIT 1
         ");
-        $stmt->execute([$token]);
+        $stmt->execute([$token, $now]);
         $row = $stmt->fetch(PDO::FETCH_ASSOC);
         return $row ?: null;
     }

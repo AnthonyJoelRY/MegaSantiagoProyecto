@@ -5,7 +5,19 @@
 declare(strict_types=1);
 
 class AdminPedidoDAO {
-    public function __construct(private PDO $pdo) {}
+    private bool $hasColorColumn = false;
+
+    public function __construct(private PDO $pdo) {
+        // Detectar columna opcional `pedido_detalle.color` (no rompe si aún no existe)
+        try {
+            $stmt = $this->pdo->prepare("SHOW COLUMNS FROM `pedido_detalle` LIKE 'color'");
+            $stmt->execute();
+            $col = $stmt->fetch(PDO::FETCH_ASSOC) ?: [];
+            $this->hasColorColumn = !empty($col);
+        } catch (Throwable $e) {
+            $this->hasColorColumn = false;
+        }
+    }
 
     /**
      * Lista pedidos (por defecto muestra todos los estados operativos).
@@ -93,9 +105,10 @@ class AdminPedidoDAO {
     }
 
     public function detalle(int $id): array {
-        $stmt = $this->pdo->prepare("
+        $sql = "
             SELECT
                 pr.nombre      AS nombre,
+                " . ($this->hasColorColumn ? "d.color AS color" : "'' AS color") . ",
                 d.cantidad     AS cantidad,
                 d.precio_unit  AS precio_unit,
                 d.subtotal     AS subtotal
@@ -103,7 +116,8 @@ class AdminPedidoDAO {
             INNER JOIN productos pr ON pr.id_producto = d.id_producto
             WHERE d.id_pedido = ?
             ORDER BY d.id_detalle ASC
-        ");
+        ";
+        $stmt = $this->pdo->prepare($sql);
         $stmt->execute([$id]);
         return $stmt->fetchAll(PDO::FETCH_ASSOC) ?: [];
     }

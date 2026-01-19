@@ -2,7 +2,9 @@
 declare(strict_types=1);
 
 // Model/DAO/InventarioDAO.php
-// DAO para tabla `inventario`. Mantiene compatibilidad: expone métodos que retornan arrays o Entities.
+// DAO para tabla `inventario` (STOCK GENERAL / BODEGA).
+// ✅ Importante: este DAO NO debe usarse para validar compras por sucursal.
+// Se mantiene por compatibilidad con panel admin y módulos existentes.
 
 require_once __DIR__ . "/../Entity/Inventario.php";
 
@@ -37,45 +39,70 @@ class InventarioDAO
         return $row ? Inventario::fromRow($row) : null;
     }
 
-public function insertar(array $data): int
-{
-file_put_contents(
-    $_SERVER['DOCUMENT_ROOT'] . "/debug_inventario_otro.log",
-    date("Y-m-d H:i:s") . " | InventarioDAO::insertar | data=" . json_encode($data) . PHP_EOL,
-    FILE_APPEND
-);
+    /**
+     * ✅ Devuelve stock general (bodega) del producto.
+     * ⚠️ No usar para checkout por sucursal.
+     */
+    public function obtenerStockGeneral(int $idProducto): int
+    {
+        $row = $this->obtenerPorId($idProducto);
+        return (int)($row["stock_actual"] ?? 0);
+    }
 
+    public function insertar(array $data): int
+    {
+        // DEBUG (mantengo tu log)
+        file_put_contents(
+            $_SERVER['DOCUMENT_ROOT'] . "/debug_inventario_otro.log",
+            date("Y-m-d H:i:s") . " | InventarioDAO::insertar | data=" . json_encode($data) . PHP_EOL,
+            FILE_APPEND
+        );
 
-if (!isset($data["id_producto"]) || (int)$data["id_producto"] <= 0) {
-    throw new Exception("❌ InventarioDAO::insertar recibió id_producto inválido: " . ($data["id_producto"] ?? "NULL"));
-}
+        if (!isset($data["id_producto"]) || (int)$data["id_producto"] <= 0) {
+            throw new Exception("❌ InventarioDAO::insertar recibió id_producto inválido: " . ($data["id_producto"] ?? "NULL"));
+        }
 
+        // Defaults seguros (no rompen si faltan en el data)
+        $data["stock_actual"] = isset($data["stock_actual"]) ? (int)$data["stock_actual"] : 0;
+        $data["ubicacion_almacen"] = $data["ubicacion_almacen"] ?? "Bodega principal";
+        $data["ultima_actualizacion"] = $data["ultima_actualizacion"] ?? date("Y-m-d H:i:s");
 
-    $sql = "
-        INSERT INTO `inventario`
-            (`id_producto`, `stock_actual`, `ubicacion_almacen`, `ultima_actualizacion`)
-        VALUES
-            (:id_producto, :stock_actual, :ubicacion_almacen, :ultima_actualizacion)
-    ";
+        $sql = "
+            INSERT INTO `inventario`
+                (`id_producto`, `stock_actual`, `ubicacion_almacen`, `ultima_actualizacion`)
+            VALUES
+                (:id_producto, :stock_actual, :ubicacion_almacen, :ultima_actualizacion)
+        ";
 
-    $stmt = $this->pdo->prepare($sql);
-    $stmt->execute(
-        $this->filtrar(
-            $data,
-            ['id_producto', 'stock_actual', 'ubicacion_almacen', 'ultima_actualizacion']
-        )
-    );
+        $stmt = $this->pdo->prepare($sql);
+        $ok = $stmt->execute(
+            $this->filtrar(
+                $data,
+                ['id_producto', 'stock_actual', 'ubicacion_almacen', 'ultima_actualizacion']
+            )
+        );
 
-    return (int)$data['id_producto'];
-}
+        if (!$ok) {
+            throw new Exception("❌ No se pudo insertar inventario general para id_producto=" . (int)$data["id_producto"]);
+        }
 
+        // ✅ compatibilidad: tu PK es id_producto, no autoincrement
+        return (int)$data['id_producto'];
+    }
 
     public function actualizar(int $id, array $data): bool
     {
-        $sql = "UPDATE `inventario` SET `stock_actual` = :stock_actual, `ubicacion_almacen` = :ubicacion_almacen, `ultima_actualizacion` = :ultima_actualizacion WHERE `id_producto` = :id";
+        $sql = "UPDATE `inventario`
+                SET `stock_actual` = :stock_actual,
+                    `ubicacion_almacen` = :ubicacion_almacen,
+                    `ultima_actualizacion` = :ultima_actualizacion
+                WHERE `id_producto` = :id";
+
         $stmt = $this->pdo->prepare($sql);
+
         $params = $this->filtrar($data, ['stock_actual', 'ubicacion_almacen', 'ultima_actualizacion']);
         $params[":id"] = $id;
+
         return $stmt->execute($params);
     }
 
@@ -90,11 +117,8 @@ if (!isset($data["id_producto"]) || (int)$data["id_producto"] <= 0) {
     {
         $out = [];
         foreach ($keys as $k) {
-            if (array_key_exists($k, $data)) $out[":".$k] = $data[$k];
+            if (array_key_exists($k, $data)) $out[":" . $k] = $data[$k];
         }
         return $out;
     }
-    
-
-
 }

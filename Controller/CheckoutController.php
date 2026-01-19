@@ -140,7 +140,8 @@ try {
         foreach ($carrito as $it) {
             $idp  = (int)($it["id_producto"] ?? $it["id"] ?? 0);
             $cant = (int)($it["cantidad"] ?? $it["qty"] ?? 0);
-            if ($idp > 0 && $cant > 0) $items[] = ["id_producto"=>$idp, "cantidad"=>$cant];
+            $color = (string)($it["color"] ?? "");
+            if ($idp > 0 && $cant > 0) $items[] = ["id_producto"=>$idp, "cantidad"=>$cant, "color"=>$color];
         }
         if (empty($items)) api_responder(["ok"=>false, "error"=>"Carrito vacío."], 400);
 
@@ -160,11 +161,12 @@ try {
         $faltantesEn = function(int $idSucursal) use ($items, $invDao): array {
             $falt = [];
             foreach ($items as $it) {
-                $stock = (int)$invDao->obtenerStock($idSucursal, (int)$it["id_producto"]);
+                $stock = (int)$invDao->obtenerStock($idSucursal, (int)$it["id_producto"], (string)($it["color"] ?? ""));
                 if ($stock < (int)$it["cantidad"]) {
                     $falt[] = [
                         "id_producto" => (int)$it["id_producto"],
                         "necesario"   => (int)$it["cantidad"],
+                        "color"       => (string)($it["color"] ?? ""),
                         "stock"       => (int)$stock,
                     ];
                 }
@@ -189,7 +191,7 @@ try {
             // score = suma del stock de cada item (mayor = "la que más tiene")
             $score = 0;
             foreach ($items as $it) {
-                $score += (int)$invDao->obtenerStock((int)$sid, (int)$it["id_producto"]);
+                $score += (int)$invDao->obtenerStock((int)$sid, (int)$it["id_producto"], (string)($it["color"] ?? ""));
             }
             if ($score > $mejorScore) {
                 $mejorScore = $score;

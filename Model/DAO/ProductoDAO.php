@@ -5,6 +5,29 @@ class ProductoDAO
 {
     public function __construct(private PDO $pdo) {}
 
+    /**
+     * Devuelve los nombres de colores asociados a un producto.
+     *
+     * ✅ No rompe nada si las tablas de colores aún no existen (devuelve []).
+     * @return array<int,string>
+     */
+    public function obtenerColores(int $idProducto): array
+    {
+        try {
+            $stmt = $this->pdo->prepare(
+                "SELECT c.nombre\n                 FROM producto_color pc\n                 INNER JOIN colores c ON c.id_color = pc.id_color\n                 WHERE pc.id_producto = :id AND c.activo = 1\n                 ORDER BY c.nombre ASC"
+            );
+            $stmt->execute([":id" => $idProducto]);
+            $rows = $stmt->fetchAll(PDO::FETCH_COLUMN);
+            if (!is_array($rows)) return [];
+            // Normalizar strings
+            return array_values(array_filter(array_map(fn($v) => trim((string)$v), $rows), fn($v) => $v !== ""));
+        } catch (Throwable $e) {
+            // Si no existen tablas/columnas, no se rompe el flujo
+            return [];
+        }
+    }
+
     public function listarPorCategoria(string $slug): array
     {
         $sql = "
@@ -194,8 +217,8 @@ class ProductoDAO
 
         $row["imagenes"] = $this->obtenerImagenes($idProducto);
 
-        // Por defecto no manejamos variantes.
-        $row["colores"] = [];
+        // Variantes (colores) - opcional, no rompe si aún no migras.
+        $row["colores"] = $this->obtenerColores($idProducto);
 
         return $row;
     }

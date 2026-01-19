@@ -1,3 +1,8 @@
+html, body {
+  max-width: 100%;
+  overflow-x: hidden;
+}
+
 /* Overrides para comportamiento del header/nav en hosting (InfinityFree)
    Objetivo: que el header + navbar NO sean fijos/sticky, y hagan scroll normal. */
 
@@ -8,10 +13,977 @@
   top: auto !important;
   left: auto !important;
   right: auto !important;
-  z-index: auto !important;
+  z-index: 1000 !important; /* 👈 CAMBIO CLAVE */
 }
+
 
 /* Si antes se dejó espacio por header fijo, lo quitamos */
 body {
   padding-top: 0 !important;
 }
+
+.search-box input {
+  border-radius: 999px;
+}
+
+.search-box .btn-search {
+  border-radius: 50%;
+  width: 42px;
+  height: 42px;
+}
+
+/* =========================
+   BUSCADOR REDONDEADO
+   ========================= */
+.search-rounded {
+  position: relative;
+  width: 100%;
+  max-width: 520px;
+}
+
+.search-rounded input {
+  width: 100%;
+  height: 52px;
+  padding: 0 56px 0 20px;
+  border-radius: 999px;
+  border: none;
+  outline: none;
+  font-size: 1rem;
+  background-color: #f3f3f3;
+  color: #333;
+}
+
+.search-rounded input::placeholder {
+  color: #777;
+}
+
+.search-rounded .btn-search-rounded {
+  position: absolute;
+  top: 50%;
+  right: 6px;
+  transform: translateY(-50%);
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  border: none;
+  background-color: #0d6efd; /* azul MegaSantiago */
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+}
+
+.search-rounded .btn-search-rounded:hover {
+  background-color: #0b5ed7;
+}
+
+/* ===== AJUSTE LUPA BUSCADOR ===== */
+header .search-box {
+  position: relative !important;
+}
+
+header .search-box .btn-search {
+  position: absolute !important;
+  top: 50% !important;
+  right: 6px !important;
+  transform: translateY(-50%) !important;
+
+  width: 44px !important;
+  height: 44px !important;
+
+  border-radius: 50% !important;
+  border: none !important;
+  padding: 0 !important;
+
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+
+  overflow: visible !important; /* 🔴 CLAVE */
+  line-height: 1 !important;
+}
+
+header .search-box .btn-search svg {
+  width: 20px !important;
+  height: 20px !important;
+
+  display: block !important;   /* 🔴 CLAVE */
+  overflow: visible !important;
+}
+
+
+/* ===== LOGO MEGASANTIAGO ===== */
+/* Mover logo hacia la derecha */
+header .header-left {
+  margin-left: 40px;
+}
+
+
+header .logo-mega {
+  height: 80px;          /* 🔹 más grande */
+  width: auto;
+  transition: transform 0.2s ease;
+}
+
+/* Pequeño efecto visual (opcional pero elegante) */
+header .logo-mega:hover {
+  transform: scale(1.05);
+}
+
+header .header-left a {
+  padding-right: 40px;
+}
+
+header .logo-mega {
+  filter: drop-shadow(0 2px 4px rgba(0,0,0,0.15));
+}
+
+/* ===== HEADER USUARIO ===== */
+#header-usuario {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+#header-usuario .btn {
+  border-radius: 999px;
+  padding: 6px 14px;
+  font-size: 0.85rem;
+}
+
+/* Badge carrito */
+#header-usuario #carrito-count {
+  font-weight: 600;
+}
+
+/* Mover bloque derecho del header hacia la izquierda */
+
+/* Mover solo el texto "Hola, usuario" a la izquierda */
+#header-usuario .user-name {
+  margin-left: -40px;
+}
+
+
+/* ===== ESCALAR TEXTO USUARIO ===== */
+#header-usuario .user-name {
+  font-size: 1rem;        /* antes ~0.85rem */
+  font-weight: 500;
+  margin-right: 14px;     /* mantiene separación */
+}
+
+/* ===== ESCALAR BOTONES HEADER ===== */
+#header-usuario .btn {
+  font-size: 0.95rem;     /* más grande */
+  padding: 8px 16px;      /* más altos y anchos */
+  border-radius: 999px;   /* redondeados */
+}
+
+/* ===== MOVER NAVBAR A LA DERECHA ===== */
+#nav .container {
+  padding-left: 100px;
+}
+
+
+
+/* ===============================
+   NAV MOBILE CARRUSEL
+   =============================== */
+
+/* POR DEFECTO: oculto */
+.nav-mobile-carousel {
+  display: none;
+}
+
+/* SOLO MÓVIL */
+@media (max-width: 768px) {
+
+  /* Ocultamos menú normal */
+  .nav-principal {
+    display: none !important;
+  }
+
+  /* Mostramos carrusel */
+  .nav-mobile-carousel {
+    display: flex;
+    gap: 12px;
+    overflow-x: auto;
+    padding: 10px 12px;
+    background: #fff;
+    scroll-snap-type: x mandatory;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  .nav-mobile-carousel::-webkit-scrollbar {
+    display: none;
+  }
+
+  .nav-btn {
+    flex: 0 0 auto;
+    padding: 10px 16px;
+    border-radius: 999px;
+    border: 1px solid #ddd;
+    background: #ffffff;
+    font-size: 14px;
+    font-weight: 600;
+    white-space: nowrap;
+    scroll-snap-align: start;
+    text-decoration: none;
+    color: #333;
+  }
+
+  .nav-btn:active {
+    background: #0069b4;
+    color: #fff;
+  }
+}
+
+
+/* ===== NAVBAR PRINCIPAL ===== */
+.nav-principal {
+  background-color: #f4c400; /* amarillo MegaSantiago */
+  border-top: none;
+  border-bottom: none;
+}
+
+
+/* Lista principal */
+/* El menú debe ocupar todo el ancho */
+.nav-principal .menu {
+  display: flex;
+  justify-content: center;   /* 🔴 CLAVE */
+  align-items: center;
+  gap: 80px;                 /* separación entre botones */
+  width: 100%;
+  margin: 0 auto;  
+  padding: 0;
+  list-style: none;
+    max-width: 1200px;  
+}
+
+
+
+
+/* Items */
+.nav-principal .menu-item > a {
+  display: inline-flex;
+  align-items: center;
+  padding: 10px 16px;
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: #333;
+  text-decoration: none;
+  border-radius: 999px;      /* estilo botón */
+  transition: all 0.2s ease;
+    gap: 6px; 
+    white-space: nowrap; 
+}
+
+/* Hover */
+.nav-principal .menu-item > a:hover {
+  background-color: #0d6efd; /* azul MegaSantiago */
+  color: #fff;
+}
+
+/* Item activo */
+.nav-principal .menu-item > a:hover {
+  background-color: rgba(0,0,0,0.08);
+  color: #000;
+}
+
+
+/* Submenu */
+.nav-principal .submenu {
+  border-radius: 10px;
+  padding: 8px 0;
+}
+
+.nav-principal .submenu a {
+  padding: 8px 16px;
+  font-size: 0.9rem;
+  text-align: center;  
+}
+
+.nav-principal .submenu a:hover {
+  background-color: #f2f6ff;
+  color: #0d6efd;
+}
+
+/* Mega menu */
+.nav-principal .mega-menu {
+  border-radius: 12px;
+  padding: 20px;
+  box-shadow: 0 8px 30px rgba(0,0,0,0.08);
+  text-align: center;
+}
+
+.nav-principal .mega-menu h4 {
+  font-size: 0.85rem;
+  font-weight: 700;
+  margin-bottom: 8px;
+  color: #0d6efd;
+  text-align: center;
+}
+
+.nav-principal .mega-menu a {
+  font-size: 0.85rem;
+  padding: 6px 0;
+  text-align: center;
+  display: block;
+}
+
+/* ===========================
+   CARRUSEL PROMOCIONES
+   =========================== */
+.promo-preview {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 40px;
+  margin: 40px auto;
+  max-width: 1200px;
+}
+
+
+.promo-img {
+  height: 420px;
+  max-width: 280px;
+  width: auto;
+
+  border-radius: 16px;
+  object-fit: cover;
+
+  transition:
+    transform 0.6s ease,
+    opacity 0.6s ease,
+    filter 0.6s ease;
+}
+
+
+
+.promo-img.active {
+  transform: scale(1);
+  opacity: 1;
+  z-index: 3;
+  box-shadow: 0 15px 40px rgba(0,0,0,0.35);
+}
+
+.promo-img.side {
+  transform: scale(0.85);
+  opacity: 0.45;
+  filter: blur(1px);
+}
+
+.promo-controls {
+  text-align: center;
+  margin-top: 15px;
+}
+
+.promo-controls button {
+  background: rgba(0,0,0,0.6);
+  color: white;
+  border: none;
+  font-size: 28px;
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+  cursor: pointer;
+  margin: 0 10px;
+  transition: background 0.3s;
+}
+
+/* Contenedor general */
+.promo-wrapper {
+  position: relative;
+  max-width: 1200px;
+  margin: 40px auto;
+}
+
+.promo-wrapper {
+  overflow: hidden;
+}
+
+
+/* Flechas */
+.promo-preview {
+  position: relative;
+}
+
+.promo-preview {
+  max-width: 100%;
+  overflow: hidden;
+}
+
+
+/* Flechas circulares */
+.promo-arrow {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+
+  width: 52px;
+  height: 52px;
+  border-radius: 50%;
+
+  background: #0d6efd; /* Azul MegaSantiago */
+  border: none;
+  cursor: pointer;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  box-shadow: 0 6px 20px rgba(0,0,0,.25);
+  transition: background .3s ease, transform .3s ease;
+}
+
+.promo-arrow:hover {
+  background: #0b5ed7;
+  transform: translateY(-50%) scale(1.1);
+}
+
+/* Posición izquierda / derecha */
+.promo-arrow.prev { left: 16px; }
+.promo-arrow.next { right: 16px; }
+
+
+/* ICONO SVG con pseudo-elemento */
+.promo-arrow::before {
+  content: "";
+  width: 18px;
+  height: 18px;
+  display: block;
+
+  background-size: contain;
+  background-repeat: no-repeat;
+  background-position: center;
+}
+
+/* Flecha izquierda */
+.promo-arrow.prev::before {
+  background-image: url("data:image/svg+xml;utf8,\
+<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='white'>\
+<path d='M15.41 7.41 14 6l-6 6 6 6 1.41-1.41L10.83 12z'/>\
+</svg>");
+}
+
+/* Flecha derecha */
+.promo-arrow.next::before {
+  background-image: url("data:image/svg+xml;utf8,\
+<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='white'>\
+<path d='m8.59 16.59 1.41 1.41 6-6-6-6-1.41 1.41L13.17 12z'/>\
+</svg>");
+}
+
+
+.promo-dots {
+  display: flex;
+  justify-content: center;
+  gap: 10px;
+  margin-top: 16px;
+}
+
+.promo-dots span {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background: #bbb;
+  cursor: pointer;
+  transition: background 0.3s ease, transform 0.3s ease;
+}
+
+.promo-dots span.active {
+  background: #333;
+  transform: scale(1.3);
+}
+
+/* Hover elegante */
+.producto-card {
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.producto-card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 14px 30px rgba(0,0,0,0.15);
+}
+
+/* Botón blanco sobre fondo amarillo */
+.btn-mega-white {
+  background-color: #ffffff;
+  color: #000;
+  border: none;
+   box-shadow: 0 4px 10px rgba(0,0,0,0.15);
+}
+
+.btn-mega-white:hover {
+  background-color: #f2f2f2;
+  color: #000;
+}
+
+/* Info amarilla de cards (MEJORADA) */
+.info-mega {
+  background-color: #FFD400;
+  padding: 1rem 0.75rem 1.2rem;
+}
+
+/* ===== CARD OFERTA ESTILO TIENDA ===== */
+
+.card-oferta {
+  background: #fff;
+  border-radius: 16px;
+  padding: 12px;
+  box-shadow: 0 8px 25px rgba(0,0,0,0.08);
+  transition: transform .2s ease, box-shadow .2s ease;
+}
+
+.card-oferta:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 14px 35px rgba(0,0,0,0.15);
+}
+
+/* Imagen */
+.oferta-img {
+  height: 190px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.oferta-img img {
+  max-height: 170px;
+  object-fit: contain;
+}
+
+/* Badge descuento */
+.badge-descuento {
+  position: absolute;
+  top: 14px;
+  left: 14px;
+  background: #ff3b3b;
+  color: #fff;
+  font-weight: 800;
+  padding: 6px 14px;
+  border-radius: 999px;
+  font-size: 0.9rem;
+}
+
+/* Info */
+.oferta-body {
+  padding: 8px 6px 28px;
+}
+
+.oferta-titulo {
+  font-size: 0.95rem;
+  font-weight: 600;
+  margin-bottom: 6px;
+  min-height: 40px;
+}
+
+.oferta-precios {
+  display: flex;
+  gap: 8px;
+  align-items: baseline;
+}
+
+.precio-antiguo {
+  text-decoration: line-through;
+  color: #999;
+  font-size: 0.9rem;
+}
+
+.precio-oferta {
+  color: #e53935;
+  font-size: 1.4rem;
+  font-weight: 800;
+}
+
+/* Botón + */
+.btn-mas {
+  position: absolute;
+  bottom: 14px;
+  right: 14px;
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  border: none;
+  background: #FFC107; /* amarillo MegaSantiago */
+  color: #000;
+  font-size: 1.4rem;
+  font-weight: 700;
+  box-shadow: 0 6px 15px rgba(0,0,0,0.2);
+}
+
+.btn-mas:hover {
+  background: #ffb300;
+}
+
+/* ===== CARD BASE (común) ===== */
+.card-producto-base {
+  background: #fff;
+  border-radius: 16px;
+  padding: 12px;
+  box-shadow: 0 8px 25px rgba(0,0,0,0.08);
+  transition: transform .2s ease, box-shadow .2s ease;
+  position: relative;
+  overflow: hidden;
+}
+
+.card-producto-base:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 14px 35px rgba(0,0,0,0.15);
+}
+
+/* Imagen común */
+.producto-img {
+  height: 190px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.producto-img img {
+  max-height: 170px;
+  object-fit: contain;
+}
+
+/* Título común */
+.producto-titulo {
+  font-size: 0.95rem;
+  font-weight: 600;
+  margin-bottom: 6px;
+  min-height: 40px;
+}
+
+/* Precios base */
+.precio-antiguo {
+  text-decoration: line-through;
+  color: #999;
+  font-size: 0.9rem;
+}
+
+.precio-oferta {
+  color: #e53935;
+  font-size: 1.4rem;
+  font-weight: 800;
+}
+
+.precio-normal {
+  font-size: 1.2rem;
+  font-weight: 700;
+}
+
+/* Botón amarillo MegaSantiago (FIJO Y LIMPIO) */
+.btn-mega-yellow {
+  background-color: #FFC107;
+  color: #000;
+  border: none;
+  font-weight: 600;
+  padding: 8px 16px;
+  line-height: 1.2;
+}
+
+.btn-mega-yellow:hover {
+  background-color: #ffb300;
+  color: #000;
+}
+
+/* ===== CATEGORÍAS SOLO IMÁGENES ===== */
+.categorias-horizontal {
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+  gap: 24px;
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+/* Imagen = botón */
+.categoria-img img {
+  width: 100%;
+  height: 300px;          /* 🔥 AHORA SÍ MÁS GRANDES */
+  object-fit: cover;
+  border-radius: 18px;
+  cursor: pointer;
+  transition: transform .25s ease, box-shadow .25s ease;
+}
+
+/* Hover elegante */
+.categoria-img img:hover {
+  transform: translateY(-6px);
+  box-shadow: 0 14px 35px rgba(0,0,0,0.25);
+}
+
+/* Tablet */
+@media (max-width: 992px) {
+  .categorias-horizontal {
+    grid-template-columns: repeat(3, 1fr);
+  }
+
+  .categoria-img img {
+    height: 220px;
+  }
+}
+
+/* Móvil */
+@media (max-width: 576px) {
+  .categorias-horizontal {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  .categoria-img img {
+    height: 180px;
+  }
+}
+
+
+
+
+
+
+
+/* ===== Carrusel PRESENTACIONAL de ofertas (ajustado) ===== */
+
+.ofertas-carrusel-wrapper {
+  overflow: hidden;
+  position: relative;
+  height: 420px;
+}
+
+/* ✅ Para que las flechas queden SIEMPRE clickeables (las cards tienen z-index alto) */
+.ofertas-carrusel-frame .promo-arrow {
+  z-index: 20;
+}
+
+
+.ofertas-carrusel {
+  position: relative;
+  width: 100%;
+  height: 100%;
+}
+
+/* Todas las cards */
+.ofertas-carrusel > div {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform-origin: center;
+  transition: transform 0.8s ease;
+  opacity: 1;              /* 👈 ya NO son opacas */
+  z-index: 1;
+}
+
+/* Card central */
+.ofertas-carrusel > div.center {
+  transform: translate(-50%, -50%) scale(1.12); /* 👈 crece un poco más */
+  z-index: 4;
+}
+
+/* Izquierda inmediata */
+.ofertas-carrusel > div.left {
+  transform: translate(-180%, -50%) scale(0.95); /* 👈 MÁS distancia */
+  z-index: 3;
+}
+
+/* Derecha inmediata */
+.ofertas-carrusel > div.right {
+  transform: translate(80%, -50%) scale(0.95);   /* 👈 MÁS distancia */
+  z-index: 3;
+}
+
+/* OTRAS cards (las que no están en turno aún) */
+.ofertas-carrusel > div:not(.center):not(.left):not(.right) {
+  transform: translate(200%, -50%) scale(0.9);  /* quedan “en espera” */
+  z-index: 1;
+}
+
+@media (max-width: 768px) {
+
+  .ofertas-carrusel-wrapper {
+    height: 460px;        /* 🔹 más alto SOLO en móvil */
+    padding-top: 20px;
+    padding-bottom: 20px;
+  }
+
+  .ofertas-carrusel > div.left,
+  .ofertas-carrusel > div.right {
+    opacity: 0;
+    pointer-events: none;
+  }
+
+  .ofertas-carrusel > div.center {
+    transform: translate(-50%, -50%) scale(1); /* 🔹 sin zoom */
+  }
+}
+
+@media (max-width: 768px) {
+
+  .promo-arrow {
+    display: none !important;
+  }
+
+  .promo-img {
+    height: 320px;
+    max-width: 240px;
+  }
+
+  .promo-preview {
+    gap: 16px;
+    margin: 20px auto;
+  }
+}
+/* Quitar botón hamburguesa (segundo menú) en móvil */
+@media (max-width: 768px) {
+  .mobile-menu-toggle,
+  .btn-menu-mobile,
+  #btnMenuMobile,
+  #mobileMenuBtn,
+  .hamburger,
+  .menu-hamburger {
+    display: none !important;
+  }
+}
+/* Ocultar mensaje informativo del filtro por URL (#) */
+.filtro-hash-info,
+.hash-info,
+.info-hash,
+.texto-hash,
+small.text-muted.hash,
+small.text-muted {
+  display: none !important;
+}
+
+
+
+
+
+
+
+
+
+/* === Producto: carrusel de imagenes === */
+.product-image-main { position: relative; }
+.product-image-main .carousel-btn {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 42px;
+  height: 42px;
+  border-radius: 999px;
+  border: 1px solid #e5e7eb;
+  background: #ffffff;
+  box-shadow: 0 6px 18px rgba(0,0,0,.12);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  z-index: 2;
+}
+.product-image-main .carousel-btn:hover { filter: brightness(0.98); }
+.product-image-main .carousel-prev { left: 12px; }
+.product-image-main .carousel-next { right: 12px; }
+
+.carousel-dots {
+  display: flex;
+  gap: 8px;
+  justify-content: center;
+  margin-top: 10px;
+}
+.carousel-dots .dot {
+  width: 10px;
+  height: 10px;
+  border-radius: 999px;
+  border: 1px solid #cbd5e1;
+  background: #ffffff;
+  cursor: pointer;
+}
+.carousel-dots .dot.active {
+  background: #0d6efd;
+  border-color: #0d6efd;
+}
+
+/* miniaturas: resaltar seleccion */
+.product-image-thumbs button {
+  border: 2px solid transparent;
+  border-radius: 10px;
+}
+.product-image-thumbs button.active {
+  border-color: #0d6efd;
+}
+
+
+/* =========================
+   DASHBOARD ADMIN (dashboard.view.php)
+   SOLO MÓVIL – NO AFECTA PC
+   ========================= */
+@media (max-width: 768px) {
+
+  /* Quitar padding excesivo del main */
+  main {
+    padding: 16px 12px !important;
+  }
+
+  /* Sidebar ocupa ancho completo */
+  .sidebar {
+    width: 100% !important;
+    min-height: auto;
+  }
+
+  /* Header del panel */
+  main .d-flex.justify-content-between {
+    flex-direction: column;
+    gap: 8px;
+    text-align: center;
+  }
+
+  /* Títulos */
+  main h1.h2 {
+    font-size: 1.4rem;
+  }
+
+  main h4 {
+    font-size: 1.1rem;
+  }
+
+  /* Cards: una debajo de otra */
+  .row.g-4 > [class^="col-"] {
+    flex: 0 0 100%;
+    max-width: 100%;
+  }
+
+  /* Números grandes */
+  .card-body h2 {
+    font-size: 2rem;
+  }
+
+  /* Ajustar márgenes entre secciones */
+  .mb-5 {
+    margin-bottom: 2rem !important;
+  }
+}
+
+
+/* ===== CENTRAR SESIÓN USUARIO EN MÓVIL ===== */
+@media (max-width: 768px) {
+
+  .header-right {
+    justify-content: center !important;
+    width: 100%;
+  }
+
+  #header-usuario {
+    justify-content: center !important;
+    align-items: center !important;
+    margin: 0 auto !important;
+    text-align: center;
+  }
+
+  /* ❌ quitar desplazamiento a la izquierda */
+  #header-usuario .user-name {
+    margin-left: 0 !important;
+  }
+
+}
+
+
+
+
+

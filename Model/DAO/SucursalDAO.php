@@ -16,20 +16,30 @@ class SucursalDAO
     }
 
     /** @return array<int, array<string,mixed>> */
-    public function listar(?string $q = null): array
-    {
-        $q = trim((string)$q);
-        if ($q !== '') {
-            $stmt = $this->pdo->prepare(
-                "SELECT * FROM sucursales WHERE nombre LIKE :q OR ciudad LIKE :q OR direccion LIKE :q ORDER BY nombre ASC"
-            );
-            $stmt->execute(["q" => "%{$q}%"]);
-            return $stmt->fetchAll(PDO::FETCH_ASSOC) ?: [];
-        }
+  public function listar(?string $q = null): array
+{
+    $sql = "
+        SELECT
+            s.*
+        FROM sucursales s
+    ";
 
-        $stmt = $this->pdo->query("SELECT * FROM sucursales ORDER BY nombre ASC");
-        return $stmt->fetchAll(PDO::FETCH_ASSOC) ?: [];
+    $params = [];
+
+    if ($q !== null && trim($q) !== '') {
+        $sql .= " WHERE (s.nombre LIKE :q1 OR s.direccion LIKE :q2) ";
+        $like = "%" . trim($q) . "%";
+        $params[":q1"] = $like;
+        $params[":q2"] = $like;
     }
+
+    $sql .= " ORDER BY s.id_sucursal DESC ";
+
+    $stmt = $this->pdo->prepare($sql);
+    $stmt->execute($params);
+    return $stmt->fetchAll(PDO::FETCH_ASSOC) ?: [];
+}
+
 
     public function crear(array $data): int
     {

@@ -6,6 +6,12 @@ class PedidoDetalle implements JsonSerializable
     public int $id_detalle = 0;
     public int $id_pedido = 0;
     public int $id_producto = 0;
+    /**
+     * Color seleccionado (opcional).
+     *
+     * Nota: Solo se persiste si la BD tiene la columna `pedido_detalle.color`.
+     */
+    public ?string $color = null;
     public int $cantidad = 0;
     public float $precio_unit = 0.0;
     public float $subtotal = 0.0;
@@ -20,6 +26,7 @@ class PedidoDetalle implements JsonSerializable
         $e->id_detalle = (int)($row["id_detalle"] ?? 0);
         $e->id_pedido = (int)($row["id_pedido"] ?? 0);
         $e->id_producto = (int)($row["id_producto"] ?? 0);
+        $e->color = isset($row["color"]) ? (string)$row["color"] : null;
         $e->cantidad = (int)($row["cantidad"] ?? 0);
         $e->precio_unit = (float)($row["precio_unit"] ?? 0.0);
         $e->subtotal = (float)($row["subtotal"] ?? 0.0);
@@ -34,6 +41,7 @@ class PedidoDetalle implements JsonSerializable
             "id_detalle" => $this->id_detalle,
             "id_pedido" => $this->id_pedido,
             "id_producto" => $this->id_producto,
+            "color" => $this->color,
             "cantidad" => $this->cantidad,
             "precio_unit" => $this->precio_unit,
             "subtotal" => $this->subtotal,

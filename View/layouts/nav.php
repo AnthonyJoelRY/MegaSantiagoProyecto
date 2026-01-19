@@ -75,3 +75,14 @@
 
   </ul>
 </nav>
+
+<!-- NAV MOBILE (solo móvil) -->
+<div class="nav-mobile-carousel">
+  <a href="<?= PROJECT_BASE ?>/View/pages/bazar.html" class="nav-btn">Bazar</a>
+  <a href="<?= PROJECT_BASE ?>/View/pages/papeleria.html" class="nav-btn">Papelería</a>
+  <a href="<?= PROJECT_BASE ?>/View/pages/productos-arte.html" class="nav-btn">Productos de arte</a>
+  <a href="<?= PROJECT_BASE ?>/View/pages/suministros-oficina.html" class="nav-btn">Suministros de oficina</a>
+  <a href="<?= PROJECT_BASE ?>/View/pages/utiles-escolares.html" class="nav-btn">Útiles escolares</a>
+  <a href="<?= PROJECT_BASE ?>/index.html#promociones" class="nav-btn">Promociones</a>
+</div>
+

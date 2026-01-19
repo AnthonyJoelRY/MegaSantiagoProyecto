@@ -56,24 +56,24 @@
                                     required>
                             </div>
 
-                            <!-- Imagen -->
+                            <!-- Imagenes -->
                             <div class="col-md-6 mb-3">
-                                <label class="form-label fw-semibold">Imagen del producto</label>
+                                <label class="form-label fw-semibold">Imagenes del producto</label>
 
-                                <input type="file" id="fileImagen" accept="image/*" class="form-control">
-                                <input type="hidden" name="imagen" id="imagenUrl">
+                                <input type="file" id="fileImagenes" accept="image/*" class="form-control" multiple>
 
-                                <?php if (!empty($producto["url_imagen"])): ?>
-                                    <small class="text-muted d-block mt-2">
-                                        Imagen actual:
-                                        <a href="<?= htmlspecialchars($producto["url_imagen"]) ?>" target="_blank">ver</a>
-                                    </small>
-                                <?php endif; ?>
+                                <!-- compat: imagen principal -->
+                                <input type="hidden" name="imagen" id="imagenUrl" value="<?= htmlspecialchars($producto["url_imagen"] ?? "") ?>">
+                                <input type="hidden" name="imagenes_json" id="imagenesJson" value="">
+
+                                <div id="previewImgs" class="d-flex flex-wrap gap-2 mt-3"></div>
 
                                 <small class="text-muted d-block mt-1" id="estadoUpload">
-                                    Si seleccionas una imagen nueva, se subirá a Firebase y reemplazará la actual.
+                                    Puedes agregar varias imagenes. La principal sera la primera o la que marques como principal.
                                 </small>
                             </div>
+
+
 
                             <!-- CATEGORÍA -->
                             <div class="col-md-6 mb-3">
@@ -152,6 +152,44 @@
 </div>
 
 
+                            <!-- ✅ COLORES (un producto puede tener varios) -->
+                            <div class="col-md-12 mb-3">
+                                <label class="form-label fw-semibold">Colores del producto (opcional)</label>
+                                <div class="row g-2">
+                                    <?php if (!empty($colores)): ?>
+                                        <?php foreach ($colores as $c): ?>
+                                            <?php $cid = (int)$c['id_color']; ?>
+                                            <div class="col-6 col-md-4 col-lg-3">
+                                                <label class="d-flex align-items-center gap-2 border rounded-3 p-2" style="cursor:pointer;">
+                                                    <input type="checkbox" name="colores[]" value="<?= $cid ?>" <?= (!empty($coloresProducto) && in_array($cid, $coloresProducto)) ? 'checked' : '' ?>>
+                                                    <span style="width:18px;height:18px;border-radius:999px;border:1px solid #ddd;display:inline-block;background:<?= htmlspecialchars($c['codigo_hex']) ?>;"></span>
+                                                    <span><?= htmlspecialchars($c['nombre']) ?></span>
+                                                </label>
+                                            </div>
+                                        <?php endforeach; ?>
+                                    <?php else: ?>
+                                        <div class="col-12">
+                                            <div class="alert alert-secondary mb-0">Aún no hay colores registrados. Puedes crear uno abajo.</div>
+                                        </div>
+                                    <?php endif; ?>
+                                </div>
+
+                                <div class="mt-3 p-3 border rounded-3 bg-white">
+                                    <div class="row g-2">
+                                        <div class="col-md-6">
+                                            <label class="form-label">Nuevo color (nombre)</label>
+                                            <input type="text" name="nuevo_color_nombre" class="form-control" placeholder="Ej: Azul">
+                                        </div>
+                                        <div class="col-md-6">
+                                            <label class="form-label">Código HEX</label>
+                                            <input type="text" name="nuevo_color_hex" class="form-control" placeholder="#0000FF">
+                                        </div>
+                                    </div>
+                                    <small class="text-muted">Si escribes un nuevo color, se creará (si no existe) y se asignará al producto.</small>
+                                </div>
+                            </div>
+
+
 
                             <!-- DESCRIPCIÓN CORTA -->
                             <div class="col-md-12 mb-3">
@@ -173,7 +211,7 @@
                         </div>
 
                         <!-- BOTÓN -->
-                        <button class="btn btn-primary fw-semibold">
+                        <button type="submit" id="btnGuardar" class="btn btn-primary fw-semibold">
                             Guardar cambios
                         </button>
                     </form>
@@ -186,7 +224,10 @@
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
 
-    <script type="module">
+    <script>
+window.__PRODUCT_IMAGES__ = <?php echo json_encode($producto['imagenes'] ?? []); ?>;
+</script>
+<script type="module">
         import {
             initializeApp
         } from "https://www.gstatic.com/firebasejs/10.14.1/firebase-app.js";
@@ -198,64 +239,197 @@
         } from "https://www.gstatic.com/firebasejs/10.14.1/firebase-storage.js";
 
         const firebaseConfig = {
-            apiKey: "TU_API_KEY",
-            authDomain: "TU_AUTH_DOMAIN",
-            projectId: "TU_PROJECT_ID",
-            storageBucket: "TU_STORAGE_BUCKET",
-            messagingSenderId: "TU_SENDER_ID",
-            appId: "TU_APP_ID"
+            apiKey: "AIzaSyDkCYDW61i0q186DDEJ-bxAvjp0iAW4-Xc",
+            authDomain: "megasantiago.firebaseapp.com",
+            projectId: "megasantiago",
+            storageBucket: "megasantiago.firebasestorage.app",
+            messagingSenderId: "68954725464",
+            appId: "1:68954725464:web:7e93567bcc98b4b3d83e2d",
+            measurementId: "G-8VB7YCPJW1"
         };
 
         const app = initializeApp(firebaseConfig);
         const storage = getStorage(app);
 
-        const fileInput = document.getElementById("fileImagen");
+        const fileInput = document.getElementById("fileImagenes");
         const estado = document.getElementById("estadoUpload");
         const imagenUrl = document.getElementById("imagenUrl");
-        const form = document.querySelector("form");
+        const imagenesJson = document.getElementById("imagenesJson");
+        const preview = document.getElementById("previewImgs");
+        const btnGuardar = document.getElementById("btnGuardar");
 
-        function nombreSeguro(nombre) {
-            return nombre
-                .toLowerCase()
-                .replace(/\s+/g, "_")
-                .replace(/[^a-z0-9._-]/g, "");
+        // Normaliza URLs para que funcionen dentro de /panel/... (evita que el navegador busque /panel/.../uploads/...)
+        const normalizeUrl = (u) => {
+            const s = String(u || "").trim();
+            if (!s) return "";
+            if (s.startsWith("http://") || s.startsWith("https://")) return s;
+            return s.startsWith("/") ? s : `/${s}`;
+        };
+
+        // Estructura unificada para el frontend: [{ url: string, principal: bool }]
+        let images = Array.isArray(window.__PRODUCT_IMAGES__) ? window.__PRODUCT_IMAGES__.slice() : [];
+        images = images
+            .map((i) => {
+                // soporta formatos: {url, principal} | {url_imagen, es_principal}
+                const rawUrl = (i && typeof i === "object")
+                    ? (i.url ?? i.url_imagen ?? i.imagen ?? i.path ?? "")
+                    : i;
+                const principal = (i && typeof i === "object")
+                    ? !!(i.principal ?? i.es_principal ?? i.is_principal)
+                    : false;
+                return { url: normalizeUrl(rawUrl), principal };
+            })
+            .filter((i) => !!i.url);
+
+        function normalize() {
+            // ensure exactly one principal
+            if (!images.some(i => i.principal)) {
+                if (images[0]) images[0].principal = true;
+            } else {
+                let seen = false;
+                images.forEach(i => {
+                    if (i.principal) {
+                        if (!seen) seen = true;
+                        else i.principal = false;
+                    }
+                });
+            }
         }
 
-        async function subirImagen(file) {
-            const stamp = Date.now();
-            const path = `productos/${stamp}_${nombreSeguro(file.name)}`;
-            const storageRef = ref(storage, path);
+        function syncHidden() {
+            normalize();
+            const principal = images.find(i => i.principal) || images[0] || null;
+            imagenUrl.value = principal ? principal.url : "";
+            imagenesJson.value = JSON.stringify(images.map(i => ({ url: i.url, principal: !!i.principal })));
+        }
 
-            await uploadBytes(storageRef, file, {
-                contentType: file.type
+        function renderPreview() {
+            preview.innerHTML = "";
+            normalize();
+            if (!images.length) {
+                const empty = document.createElement("div");
+                empty.className = "text-muted";
+                empty.textContent = "Aun no hay imagenes registradas.";
+                preview.appendChild(empty);
+                syncHidden();
+                return;
+            }
+
+            images.forEach((img, idx) => {
+                const item = document.createElement("div");
+                item.style.display = "flex";
+                item.style.alignItems = "center";
+                item.style.gap = "10px";
+                item.style.padding = "6px 0";
+
+                const thumb = document.createElement("img");
+                thumb.src = img.url;
+                thumb.alt = "img";
+                thumb.style.width = "56px";
+                thumb.style.height = "56px";
+                thumb.style.objectFit = "cover";
+                thumb.style.borderRadius = "10px";
+                thumb.style.border = img.principal ? "2px solid #0d6efd" : "1px solid #ddd";
+
+                const meta = document.createElement("div");
+                meta.style.flex = "1";
+
+                const title = document.createElement("div");
+                title.style.fontSize = "13px";
+                title.textContent = img.principal ? "Principal" : "Imagen";
+
+                const actions = document.createElement("div");
+                actions.style.display = "flex";
+                actions.style.gap = "8px";
+
+                const btnPrincipal = document.createElement("button");
+                btnPrincipal.type = "button";
+                btnPrincipal.className = "btn btn-sm btn-outline-primary";
+                btnPrincipal.textContent = "Hacer principal";
+                btnPrincipal.disabled = !!img.principal;
+                btnPrincipal.addEventListener("click", () => {
+                    images.forEach(i => i.principal = false);
+                    images[idx].principal = true;
+                    renderPreview();
+                });
+
+                const btnRemove = document.createElement("button");
+                btnRemove.type = "button";
+                btnRemove.className = "btn btn-sm btn-outline-danger";
+                btnRemove.textContent = "Quitar";
+                btnRemove.addEventListener("click", () => {
+                    const wasPrincipal = !!images[idx].principal;
+                    images.splice(idx, 1);
+                    if (wasPrincipal && images[0]) images[0].principal = true;
+                    renderPreview();
+                });
+
+                actions.appendChild(btnPrincipal);
+                actions.appendChild(btnRemove);
+
+                meta.appendChild(title);
+                meta.appendChild(actions);
+
+                item.appendChild(thumb);
+                item.appendChild(meta);
+
+                preview.appendChild(item);
             });
+
+            syncHidden();
+        }
+
+        async function uploadFile(file) {
+            const safeName = `${Date.now()}_${Math.random().toString(16).slice(2)}_${file.name}`;
+            const storageRef = ref(storage, `productos/${safeName}`);
+            await uploadBytes(storageRef, file);
             return await getDownloadURL(storageRef);
         }
 
-        fileInput.addEventListener("change", async () => {
-            const file = fileInput.files?.[0];
-            if (!file) return;
+        if (fileInput) {
+            fileInput.addEventListener("change", async () => {
+                const files = Array.from(fileInput.files || []);
+                if (!files.length) return;
 
-            estado.textContent = "Subiendo imagen a Firebase...";
-            imagenUrl.value = "";
+                if (btnGuardar) btnGuardar.disabled = true;
+                estado.textContent = "Subiendo imagenes...";
 
-            try {
-                const url = await subirImagen(file);
-                imagenUrl.value = url;
-                estado.textContent = "✅ Imagen subida correctamente.";
-            } catch (e) {
-                console.error(e);
-                estado.textContent = "❌ Error subiendo imagen. Revisa Rules de Storage y consola.";
-            }
-        });
+                try {
+                    for (const f of files) {
+                        const url = await uploadFile(f);
+                        images.push({"url": url, "principal": images.length === 0});
+                    }
+                } catch (e) {
+                    console.error(e);
+                    alert("No se pudo subir una o mas imagenes. Revisa tu configuracion de Firebase.");
+                } finally {
+                    fileInput.value = "";
+                    if (btnGuardar) btnGuardar.disabled = false;
+                    estado.textContent = "Listo.";
+                    renderPreview();
+                }
+            });
+        }
 
-        form.addEventListener("submit", (e) => {
-            if (fileInput.files?.length && !imagenUrl.value) {
-                e.preventDefault();
-                alert("Espera a que la imagen termine de subirse a Firebase antes de guardar.");
-            }
-        });
-    </script>
+        // Evitar guardar mientras se esta subiendo / si no hay principal
+        const form = document.querySelector("form");
+        if (form) {
+            form.addEventListener("submit", (e) => {
+                syncHidden();
+                if (!imagenUrl.value) {
+                    e.preventDefault();
+                    alert("Debes tener al menos 1 imagen (principal) antes de guardar.");
+                    return;
+                }
+                if (btnGuardar) {
+                    btnGuardar.disabled = true;
+                    btnGuardar.innerText = "Guardando...";
+                }
+            });
+        }
+
+        renderPreview();
+</script>
 
 </body>
 

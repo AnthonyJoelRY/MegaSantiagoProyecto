@@ -207,11 +207,12 @@
 
                 <div class="card shadow-sm mt-4 border-warning">
     <div class="card-body">
-        <h5 class="fw-bold mb-3 text-warning">⚠️ Productos con stock bajo (MENOR A 15 EN STOCK)</h5>
+        <h5 class="fw-bold mb-3 text-warning">⚠️ Productos con stock bajo por sucursal (MENOR O IGUAL AL STOCK MÍNIMO)</h5>
 
         <table class="table table-sm">
             <thead class="table-light">
                 <tr>
+                    <th>Sucursal</th>
                     <th>Producto</th>
                     <th>Stock actual</th>
                     <th>Stock mínimo</th>
@@ -219,7 +220,7 @@
             </thead>
             <tbody id="tablaProductosStockBajo">
                 <tr>
-                    <td colspan="3" class="text-muted text-center">Cargando...</td>
+                    <td colspan="4" class="text-muted text-center">Cargando...</td>
                 </tr>
             </tbody>
         </table>
@@ -348,13 +349,14 @@
         tbody.innerHTML = "";
 
         if (!rows.length) {
-            tbody.innerHTML = `<tr><td colspan="3" class="text-center text-muted">Sin alertas 👍</td></tr>`;
+            tbody.innerHTML = `<tr><td colspan="4" class="text-center text-muted">Sin alertas 👍</td></tr>`;
             return;
         }
 
         rows.forEach(p => {
             tbody.innerHTML += `
                 <tr>
+                    <td>${p.sucursal ?? '-'}</td>
                     <td>${p.nombre}</td>
                     <td class="fw-bold">${p.stock_actual}</td>
                     <td>${p.stock_minimo}</td>

@@ -183,22 +183,70 @@ PRODUCTOS MENOS VENDIDOS
 
 public function productosStockBajo(): array
 {
-    
-    $stmt = $this->pdo->query("
-        SELECT 
+    // ✅ Reporte por SUCURSAL (inventario_sucursal)
+    // - Un producto puede estar bajo de stock en una sucursal y normal en otra.
+    // - No rompe tu UI: simplemente devuelve más columnas.
+
+    $sql = "
+        SELECT
+            s.id_sucursal,
+            s.nombre        AS sucursal,
             p.id_producto,
             p.nombre,
-            COALESCE(i.stock_actual, 0) AS stock_actual,
-            p.stock_minimo
-        FROM productos p
-        LEFT JOIN inventario i ON i.id_producto = p.id_producto
+            i.stock_actual,
+            i.stock_minimo
+        FROM inventario_sucursal i
+        JOIN sucursales s ON s.id_sucursal = i.id_sucursal
+        JOIN productos  p ON p.id_producto = i.id_producto
         WHERE p.activo = 1
-          AND COALESCE(i.stock_actual, 0) <= p.stock_minimo
-        ORDER BY stock_actual ASC
-    ");
+          AND COALESCE(s.activo, 1) = 1
+          AND COALESCE(i.stock_actual, 0) > 0
+          AND COALESCE(i.stock_actual, 0) <= COALESCE(i.stock_minimo, 0)
+        ORDER BY s.nombre ASC, i.stock_actual ASC, p.nombre ASC
+    ";
+
+    $stmt = $this->pdo->query($sql);
+    return $stmt->fetchAll(PDO::FETCH_ASSOC);
+}
+    // ✅ TOP productos más vendidos pero con datos para el HOME (id, nombre, precio, imagen, etc.)
+public function productosMasVendidosPublicos(int $limit = 4): array
+{
+    $limit = max(1, (int)$limit);
+
+    $sql = "
+        SELECT 
+            pr.id_producto AS id,
+            pr.nombre,
+            pr.descripcion_corta,
+            pr.precio,
+            pr.precio_oferta,
+            c.slug AS categoria,
+            (
+                SELECT url_imagen
+                FROM producto_imagenes i
+                WHERE i.id_producto = pr.id_producto
+                ORDER BY i.es_principal DESC, i.orden ASC, i.id_imagen ASC
+                LIMIT 1
+            ) AS imagen,
+            SUM(pd.cantidad) AS total_vendido
+        FROM pedido_detalle pd
+        JOIN pedidos p      ON p.id_pedido = pd.id_pedido
+        JOIN productos pr   ON pr.id_producto = pd.id_producto
+        JOIN categorias c   ON c.id_categoria = pr.id_categoria
+        WHERE p.estado = 'pagado'
+          AND pr.activo = 1
+        GROUP BY pr.id_producto, pr.nombre, pr.descripcion_corta, pr.precio, pr.precio_oferta, c.slug
+        ORDER BY total_vendido DESC
+        LIMIT ?
+    ";
+
+    $stmt = $this->pdo->prepare($sql);
+    $stmt->bindValue(1, $limit, PDO::PARAM_INT);
+    $stmt->execute();
 
     return $stmt->fetchAll(PDO::FETCH_ASSOC);
 }
+
 
 
 }

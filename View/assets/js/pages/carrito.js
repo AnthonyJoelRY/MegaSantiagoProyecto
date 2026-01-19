@@ -344,6 +344,26 @@
     else el.style.display = "none";
   }
 
+  function esEmpresaSesion() {
+    try {
+      const user = JSON.parse(localStorage.getItem("usuarioMega") || "null");
+      const rol = user?.rol ?? user?.id_rol ?? null;
+      return Number(rol) === 2;
+    } catch (e) {
+      return false;
+    }
+  }
+
+  function calcularTotalesCarrito(carrito, esEmpresa) {
+    const subtotalProductos = carrito.reduce((acc, it) => acc + (Number(it.precio) * Number(it.cantidad)), 0);
+    const rate = esEmpresa ? 0.10 : 0;
+    const descuentoEmpresa = subtotalProductos * rate;
+    const subtotalConDescuento = Math.max(0, subtotalProductos - descuentoEmpresa);
+    const iva = subtotalConDescuento * 0.12; // 12% (igual que en el backend)
+    const totalPagar = subtotalConDescuento + iva;
+    return { subtotalProductos, descuentoEmpresa, subtotalConDescuento, iva, totalPagar, rate };
+  }
+
   function renderCarrito() {
     const tbody = document.getElementById("tbodyCarrito");
     const divVacio = document.getElementById("cart-vacio");
@@ -375,27 +395,59 @@
 
     let total = 0;
 
+    // Clave única por variante (producto + color)
+    const keyOf = (it) => {
+      const id = String(it?.id ?? "");
+      const color = String(it?.color ?? "").trim();
+      return `${id}__${color}`;
+    };
+
     carrito.forEach((item) => {
       const subtotal = item.precio * item.cantidad;
       total += subtotal;
 
+      const k = keyOf(item);
+
       const tr = document.createElement("tr");
       tr.innerHTML = `
         <td>${item.nombre}</td>
+        <td>${(item.color && String(item.color).trim() !== "") ? String(item.color) : "-"}</td>
         <td>${formatearDinero(item.precio)}</td>
         <td>
           <input type="number" min="1" value="${item.cantidad}"
-                class="cart-cantidad" data-id="${item.id}">
+                class="cart-cantidad" data-key="${k}">
         </td>
         <td>${formatearDinero(subtotal)}</td>
         <td>
-          <button class="btn-cart-delete" data-id="${item.id}">✕</button>
+          <button class="btn-cart-delete" data-key="${k}">✕</button>
         </td>
       `;
       tbody.appendChild(tr);
     });
 
-    spanTotal.textContent = formatearDinero(total);
+    const esEmpresa = esEmpresaSesion();
+    const t = calcularTotalesCarrito(carrito, esEmpresa);
+
+    // Mostramos el total a pagar (para que coincida con PayPal y con el dashboard)
+    spanTotal.textContent = formatearDinero(t.totalPagar);
+
+    // ✅ UI extra para empresa
+    const bd = document.getElementById("empresa-breakdown");
+    if (bd && esEmpresa) {
+      bd.style.display = "block";
+      const set = (id, val) => {
+        const el = document.getElementById(id);
+        if (el) el.textContent = formatearDinero(val);
+      };
+      set("emp_subtotal", t.subtotalProductos);
+      set("emp_descuento", t.descuentoEmpresa);
+      set("emp_subtotal_desc", t.subtotalConDescuento);
+      set("emp_iva", t.iva);
+      set("emp_total", t.totalPagar);
+    } else if (bd) {
+      bd.style.display = "none";
+    }
+
     mostrarAvisoDescuentoEmpresa();
   }
 
@@ -403,13 +455,16 @@
     document.addEventListener("change", (e) => {
       if (!e.target.classList.contains("cart-cantidad")) return;
 
-      const id = e.target.getAttribute("data-id");
+      const key = e.target.getAttribute("data-key") || "";
       let nuevaCantidad = parseInt(e.target.value, 10);
       if (isNaN(nuevaCantidad) || nuevaCantidad < 1) nuevaCantidad = 1;
       e.target.value = nuevaCantidad;
 
       const carrito = obtenerCarrito();
-      const item = carrito.find(p => String(p.id) === String(id));
+      const item = carrito.find(p => {
+        const k = `${String(p?.id ?? "")}__${String(p?.color ?? "").trim()}`;
+        return k === key;
+      });
       if (item) {
         item.cantidad = nuevaCantidad;
         guardarCarrito(carrito);
@@ -421,9 +476,12 @@
     document.addEventListener("click", (e) => {
       if (!e.target.classList.contains("btn-cart-delete")) return;
 
-      const id = e.target.getAttribute("data-id");
+      const key = e.target.getAttribute("data-key") || "";
       let carrito = obtenerCarrito();
-      carrito = carrito.filter(p => String(p.id) !== String(id));
+      carrito = carrito.filter(p => {
+        const k = `${String(p?.id ?? "")}__${String(p?.color ?? "").trim()}`;
+        return k !== key;
+      });
 
       guardarCarrito(carrito);
       renderCarrito();
@@ -497,16 +555,18 @@ const carrito = obtenerCarrito();
           it.id ?? it.id_producto ?? it.idProducto ?? it.idProductoFK ?? it.id_producto_fk ?? 0
         );
         const cantidad = Number(it.cantidad ?? it.qty ?? it.quantity ?? 0);
-        return { id, cantidad };
+        const color = String(it.color ?? "").trim();
+        return { id, cantidad, color };
       })
       .filter(it => it.id > 0 && it.cantidad > 0);
   }
 
   function totalCarritoPayPal() {
     const carrito = obtenerCarrito();
-    const total = carrito.reduce((acc, it) => acc + (Number(it.precio) * Number(it.cantidad)), 0);
+    const esEmpresa = esEmpresaSesion();
+    const t = calcularTotalesCarrito(carrito, esEmpresa);
     // PayPal espera string con 2 decimales
-    return Number(total || 0).toFixed(2);
+    return Number(t.totalPagar || 0).toFixed(2);
   }
 
   function getUsuarioLocal() {

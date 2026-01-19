@@ -236,8 +236,9 @@ function normalizarCarritoPedido(array $carrito): array
         $id = (int)($it["id"] ?? ($it["id_producto"] ?? ($it["idProducto"] ?? 0)));
         // Soporta {cantidad} o {qty}
         $cantidad = (int)($it["cantidad"] ?? ($it["qty"] ?? ($it["cantidad_producto"] ?? ($it["quantity"] ?? 0))));
+        $color = (string)($it["color"] ?? "");
         if ($id > 0 && $cantidad > 0) {
-            $out[] = ["id" => $id, "cantidad" => $cantidad];
+            $out[] = ["id" => $id, "cantidad" => $cantidad, "color" => $color];
         }
     }
     return $out;

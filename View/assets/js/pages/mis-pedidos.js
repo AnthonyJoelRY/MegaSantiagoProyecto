@@ -137,6 +137,7 @@
           <thead>
             <tr>
               <th>Producto</th>
+              <th>Color</th>
               <th>Cant.</th>
               <th>Precio</th>
               <th>Subtotal</th>
@@ -146,6 +147,7 @@
             ${items.map(it => `
               <tr>
                 <td>${escapeHtml(it.nombre || '')}</td>
+                <td>${escapeHtml((it.color && String(it.color).trim() !== '') ? String(it.color) : '-')}</td>
                 <td>${Number(it.cantidad || 0)}</td>
                 <td>${formatMoney(it.precio_unit)}</td>
                 <td>${formatMoney(it.subtotal)}</td>

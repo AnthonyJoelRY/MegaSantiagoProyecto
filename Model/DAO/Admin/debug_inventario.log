@@ -7,3 +7,6 @@
 2026-01-10 13:54:02 | insertarInventarioConStock | idProducto=1028 | stock=55
 2026-01-10 14:25:03 | insertarInventarioConStock | idProducto=1029 | stock=100
 2026-01-10 14:26:38 | insertarInventarioConStock | idProducto=1030 | stock=42
+2026-01-14 09:02:40 | insertarInventarioConStock | idProducto=1031 | stock=1
+2026-01-14 09:06:53 | insertarInventarioConStock | idProducto=1032 | stock=1
+2026-01-14 09:08:53 | insertarInventarioConStock | idProducto=1033 | stock=1
