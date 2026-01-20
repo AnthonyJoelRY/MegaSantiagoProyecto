@@ -356,10 +356,3 @@ private function actionPull(): void {
   </a>
 </p>
 
-<hr>
-<h2>Licencia</h2>
-<p>
-  Este proyecto se distribuye bajo la <strong>Apache License, Version 2.0</strong>.
-</p>
-
-<hr>
