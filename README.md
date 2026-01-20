@@ -231,6 +231,121 @@
 
 <hr>
 
+<h2>API de Sincronización / Exportación de Base de Datos</h2>
+<p>
+  El proyecto incluye una <strong>API de sincronización</strong> que permite <strong>exportar datos</strong> desde una instancia
+  (ej. MegaSantiago externo) e <strong>importarlos/actualizarlos</strong> en nuestra base de datos, manteniendo el catálogo
+  consistente y evitando duplicados.
+</p>
+
+<h3>Objetivo</h3>
+<ul>
+  <li>Transferir información (principalmente <strong>catálogo de productos</strong>) desde MegaSantiago hacia nuestra BD.</li>
+  <li>Soportar sincronización <strong>incremental</strong> mediante parámetro <code>since</code> (trae solo cambios recientes).</li>
+  <li>Proteger el acceso mediante <strong>token Bearer</strong> (API Key) y registro de ejecución.</li>
+</ul>
+
+<h3>Flujo general</h3>
+<ol>
+  <li>Un usuario con rol <strong>Administrador</strong> ejecuta la importación desde el panel.</li>
+  <li>El sistema consulta la última sincronización guardada (control interno).</li>
+  <li>Se solicita a la API remota los datos modificados desde esa fecha (<code>pull</code>).</li>
+  <li>Se realiza <strong>upsert</strong> (insertar/actualizar) en la base de datos local.</li>
+  <li>Se registra el estado final (OK/ERROR) para auditoría y seguimiento.</li>
+</ol>
+
+<h3>Autenticación (Bearer Token)</h3>
+<p>La API exige el header:</p>
+<pre><code>Authorization: Bearer &lt;SYNC_API_KEY&gt;</code></pre>
+
+<h3>Endpoints principales</h3>
+<table border="1" cellpadding="8" cellspacing="0" width="100%">
+  <thead>
+    <tr>
+      <th align="left">Acción</th>
+      <th align="left">Endpoint</th>
+      <th align="left">Descripción</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>Status</td>
+      <td><code>Controller/SyncController.php?accion=status</code></td>
+      <td>Verifica que la API esté activa y lista para responder solicitudes.</td>
+    </tr>
+    <tr>
+      <td>Pull</td>
+      <td><code>Controller/SyncController.php?accion=pull&amp;entidad=productos&amp;since=YYYY-MM-DD HH:MM:SS</code></td>
+      <td>Exporta registros actualizados desde una fecha (sincronización incremental).</td>
+    </tr>
+    <tr>
+      <td>Import (Local)</td>
+      <td><code>Controller/AdminSyncController.php?accion=import&amp;entidad=productos</code></td>
+      <td>Consume la API remota y aplica inserción/actualización en la BD local (solo Admin).</td>
+    </tr>
+  </tbody>
+</table>
+
+<h3>Archivos clave (referencia)</h3>
+<ul>
+  <li><code>Controller/SyncController.php</code> — API remota: expone <code>status</code> y <code>pull</code>.</li>
+  <li><code>Controller/AdminSyncController.php</code> — Importación local (ejecuta sincronización, rol Admin).</li>
+  <li><code>Model/Config/sync.php</code> — Configuración: URL remota, API key y entidades habilitadas.</li>
+  <li><code>Model/Config/sync_map.php</code> — Mapeo de entidades (ej. productos) hacia tablas/campos.</li>
+</ul>
+
+<h3>Código (estructura base)</h3>
+
+<p><strong>1) Verificación del token Bearer (API remota):</strong></p>
+<pre><code class="language-php">// Controller/SyncController.php (extracto)
+private function verifyAuth(): void {
+  $auth = $_SERVER['HTTP_AUTHORIZATION'] ?? '';
+  if (!preg_match('/Bearer\s+(.*)$/i', $auth, $m)) {
+    $this->jsonError("Unauthorized", 401);
+  }
+  $token = trim($m[1]);
+  if ($token !== SYNC_API_KEY) {
+    $this->jsonError("Forbidden", 403);
+  }
+}</code></pre>
+
+<p><strong>2) Exportación incremental (Pull):</strong></p>
+<pre><code class="language-php">// Controller/SyncController.php (extracto)
+private function actionPull(): void {
+  $entidad = $_GET['entidad'] ?? '';
+  $since = $_GET['since'] ?? null;
+
+  $map = SYNC_MAP[$entidad] ?? null;
+  if (!$map) $this->jsonError("Entidad inválida", 400);
+
+  $table = $map['table'];
+  $updatedAt = $map['updated_at'];
+
+  $sql = "SELECT * FROM {$table}";
+  $params = [];
+  if ($since) {
+    $sql .= " WHERE {$updatedAt} &gt; ?";
+    $params[] = $since;
+  }
+
+  $st = $this-&gt;pdo-&gt;prepare($sql);
+  $st-&gt;execute($params);
+
+  $rows = $st-&gt;fetchAll(PDO::FETCH_ASSOC);
+  echo json_encode([
+    'ok' =&gt; true,
+    'entidad' =&gt; $entidad,
+    'count' =&gt; count($rows),
+    'data' =&gt; $rows
+  ]);
+}</code></pre>
+
+<p><strong>3) Ejemplo de llamada por consola (prueba rápida):</strong></p>
+<pre><code>curl -H "Authorization: Bearer &lt;SYNC_API_KEY&gt;" \
+"https://SERVIDOR_REMOTO/Mega_Santiago/Controller/SyncController.php?accion=pull&amp;entidad=productos&amp;since=2026-01-01 00:00:00"</code></pre>
+
+<hr>
+
 <h2>Documentación</h2>
 <p>
   La documentación técnica y funcional completa está disponible en la Wiki del proyecto:
